@@ -129,19 +129,16 @@ class Layout():
         rows = [i for i in range(grid[0])]
         cols = [i for i in range(grid[1])]
         self.build = {p: [] for p in product(rows, cols)}
-        #self.selection = {p: [] for p in product(rows, cols)}
-        
-        # Keep track of operations to coordinate them.
-        self._select = False
-        self._style = False
-        self._label = False
         
         # "panel", not "facet" -- https://ggplot2.tidyverse.org/reference/facet_grid.html
-        view = py3Dmol.view(width=panel_size[0]*grid[1], height=panel_size[1]*grid[0], linked=linked, viewergrid=grid)
+        view = py3Dmol.view(
+            width=panel_size[0]*grid[1],
+            height=panel_size[1]*grid[0],
+            linked=linked,
+            viewergrid=grid)
         stream = self.fold.to_stream()
         view.addModel(stream, 'pdb')
         self.view = view
-
 
     def select(self, residues=[], elements=[], chain=''):
         '''
@@ -230,7 +227,7 @@ class Layout():
     # https://3dmol.csb.pitt.edu/doc/types.html#SurfaceStyleSpec
     # viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: data, color:'red'},{chain:'C'});
     # def geom_ribbon(self, key=None, selection=None, color='grey', palette='viridis', color_map_limits=None, thickness=0.4, opacity=1, ribbon=False, arrows=False, tubes=False, style='rectangle', panel=(0, 0)):
-    def geom_surface(self, key=None, selection=None, surface_type='VWD', opacity=1, color='white', palette='viridis', color_map_limits=None, panel=(0, 0)):
+    def geom_surface(self, key=None, selection=None, surface_type='MS', opacity=1, color='white', palette='viridis', color_map_limits=None, panel=(0, 0)):
         '''
         https://3dmol.csb.pitt.edu/doc/types.html#SurfaceStyleSpec
         
@@ -275,7 +272,7 @@ class Layout():
         # pdb.set_trace()
         return self
     
-    def geom_sphere(self, selection=None, key='position', radius=0.3, panel=(0, 0)):
+    def geom_sphere(self, selection=None, key='position', color='black', radius=2, panel=(0, 0)):
         
         if not selection:
             selection = self.select()
@@ -284,7 +281,7 @@ class Layout():
             'radius': radius
         }
     
-        style = {'sphere': {'color': 'green'} | properties}
+        style = {'sphere': {'color': color} | properties}
         _ = self.add_to_build('sphere', panel, [selection, style])
         return self
     
@@ -330,4 +327,3 @@ class Layout():
         
         self.view.zoomTo()
         return self.view
-

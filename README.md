@@ -28,8 +28,9 @@ Protein visualization without the pain.
 - load and display variation from a multiple sequence alignment
 
 <!-- https://gist.github.com/DavidWells/7d2e0e1bc78f4ac59a123ddf8b74932d -->
+<!-- https://www.rcsb.org/structure/3OTM -->
 <p align="center">
-    <img src="img/rabbit.png" alt="A rabbit" width="150">
+    <img src="img/antifreeze.png" alt="Antifreeze protein (PDB 3OTM)" width="150">
 </p>
 
 ^ The image is an origami rabbit, visualised using NMR at 2Å resolution. 
