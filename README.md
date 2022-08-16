@@ -1,211 +1,144 @@
-## Foldspace
+## Faltwerk
 
-_Why this library?_ Exploratory analysis of protein structures in a REPL such as `jupyter notebook` and outside of point-and-click tools can be surprisingly annoying. The awesome `Anvio` has a [structure module](https://merenlab.org/2018/09/04/getting-started-with-anvio-structure/), should you be dissatisfied with `foldspace`. However, I wanted a more lightweight tool, which to my knowledge did not exist, so I made one. 
+`faltwerk` is a library for spatial exploratory data analysis of protein structures. It helps parse them, select items of interest, generate and visualise various protein annotations, and then provide convenient interfaces for downstream tools to perform e. g. as spatial regression. The most convenient way to run `faltwerk` is in a `jupyter notebook`.
+
+<p align="center">
+    <img src="img/antifreeze.png" alt="Antifreeze protein (PDB 3OTM)" width="400">
+</p>
+
+_Why this library?_ Exploratory analysis of protein structures in a REPL such as `jupyter notebook`s and outside of point-and-click tools can be surprisingly annoying.
 
 By "exploratory", we mean spatial. The curious thing about proteins is that by design they are a linear string of residues, but then folds up into the functionally active structure. Nature selects on the 3D structure, but we typically analyse the linear sequence (DNA sequencing). `foldspace` really wants to bridge this gap. More specifically, here are some use cases:
 
-- Annotate solvent access, active centers and more.
+- Annotate solvent access, active centers and more
 - Some regions in the amino acid sequence are more conserved than others across species. Which regions in the 3D structure do they correspond to?
 - Are there any significant spatial hotspots where residues experience positive selection?
 - Do observed mutations cluster in any part of the protein, for example in regions that interface other proteins (protein binding sites) or active sites of the protein?
-- A hotspot/ cluster has been identified; which protein features if any can explain this occurence. For example, is the cluster associated with known protein-binding sites?
+- A hotspot/ cluster has been identified; which protein features if any can explain this occurance. For example, is the cluster associated with known protein-binding sites?
 - What's the spatial relationship between mutations deemed pathogenic and the annotated functional domains of a protein?
 
-Examples:
-
-- Barber _et al._, 2014
-- gnomad/ clinvar map mutations
-
-PRs and suggestions welcome!
-
-Protein visualization without the pain. 
-
-`foldspace` currently supports `jupyter notebook`-based exploration of:
-
-- alignment of protein structures
-- color by label (pLDDT, N to C terminus)
-- display `AlphaFold2` model variance
-- load and display variation from a multiple sequence alignment
-
-<!-- https://gist.github.com/DavidWells/7d2e0e1bc78f4ac59a123ddf8b74932d -->
-<!-- https://www.rcsb.org/structure/3OTM -->
-<p align="center">
-    <img src="img/antifreeze.png" alt="Antifreeze protein (PDB 3OTM)" width="150">
-</p>
-
-^ The image is an origami rabbit, visualised using NMR at 2Å resolution. 
+PRs and suggestions welcome! The awesome `Anvio` has a [structure module](https://merenlab.org/2018/09/04/getting-started-with-anvio-structure/), should you be dissatisfied with `faltwerk`. 
 
 
 ### Install
 
-Requires Python 3.9
-
-
 ```bash
-# Dependencies
-conda create -n foldspace -c bioconda -c conda-forge python=3.9 jupyter screed numpy biopython matplotlib py3dmol hmmer && conda activate foldspace
-# Foldseek conda package not current version last time I checked
-# For Mac
-wget https://mmseqs.com/foldseek/foldseek-osx-universal.tar.gz; tar xvzf foldseek-osx-universal.tar.gz; export PATH=$(pwd)/foldseek/bin/:$PATH
-# For other systems: https://github.com/steineggerlab/foldseek#installation
+chmod +x install.sh
+./install.sh
+# ... or just follow the steps therein manually
 
-# This package
-git clone github.com/phiweger/foldspace
-cd foldspace
-pip install -e .
-
-# To run the examples below
-wget https://files.rcsb.org/download/1BXW.pdb
-
-# Get Pfam database (Version v31, this matters!)
+# Get Pfam database (Version v31 -- this matters!)
 wget http://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam31.0/Pfam-A.hmm.dat.gz
 wget http://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam31.0/Pfam-A.hmm.gz
 gunzip *
-hmmpress Pfam-A.hmm.gz 
+hmmpress Pfam-A.hmm.gz
 ```
 
 
 ### Usage
 
-We assume that all structures are single-model, and if you are not analysing complexes, then you want them to be single chain also. A simple way to clean a query pdb file is through `pdb-tools`:
+We assume that all protein structures contain a single, and if you are not analysing protein complexes, then you want the structures to only contain a single chain, also. A simple way to clean a query pdb file is through `pdb-tools` (http://www.bonvinlab.org/pdb-tools/). _AlphaFold2_ predictions as generated by _ColabFold_ are ideal.
 
+To get an overview of what you can do with `faltwerk` and to interact with the data and code, we provide a notebook:
+
+```bash
+jupyter notebook example.ipynb
 ```
-# example here
-# https://www.bonvinlab.org/pdb-tools/
-```
 
-Run the code below in a Jupyter notebook for the structures to render (`jupyter notebook example.ipynb`).
-
-We will explore the protein structure of the full-length `ompA` gene of [Chlamydiifrater volucris](https://www.ncbi.nlm.nih.gov/genome/?term=Chlamydiifrater+volucris). It has 6 more (truncated) homologs of that gene in its genome. We are interested here in the variation amongst these copies.
-
-We already used `AlphaFold2` to fold `OmpA` using the awesome `ColabFold` ([code](https://github.com/sokrypton/ColabFold), [preprint](https://www.biorxiv.org/content/10.1101/2021.08.15.456425v3)) and saved the data under `data/full`
-
+To give an idea of what it looks like to use `faltwerk`:
 
 ```python
-import numpy as np
+# Load data
+from faltwerk.models import Fold, AlphaFold
+# ... (for details see notebook)
 
-from foldspace.io import load_conserved
-from foldspace.models import Fold, AlphaFold
-from foldspace.vis import *  # yes I know, whatever
+fp = 'data/alphafold2/transferrin/test_08df6_unrelaxed_rank_1_model_3.pdb'
+model = Fold(fp)
 
+# or
+fp = 'data/alphafold2/transferrin/'
+af = AlphaFold(fp)
+model = af.best
 
-# Load alphafold model
-af = AlphaFold('data/full')
-# Pick the best model out of the 5 predictions
-model = af.models[1]
-
-
-# Load a PDB structure model
-ref = Fold('data/1BXW.pdb')
-# Align proteins and transform the query into the coordinate space of the target
-tm, aln = ref.align_to(model, mode=2, minscore=0.3)
-print(f'TM-score: {tm}')
-# params passed to foldseek, see "foldseek search -h"
-aln.rename_chains_({'A': 'B'})
-
-
-# How does the structure we predict compare to experimentally validated ones?
-view = plot_superposition([model, aln], {'A': 'grey', 'B': 'yellow'})
-view.show()
+# Visualise pLDDT (how good is AF2 the prediction)
+ly = Layout(model).geom_ribbon('plddt', palette='rainbow_r')
 ```
 
-
 <p align="center">
-    <img src="img/overlay.png" width="350">
+    <img src="img/pLDDT.png" width="350">
 </p>
 
 
 ```python
-# How certain is the AlphaFold2 of its prediction?
-print(f"pLDDT for best model is {round(np.mean(model.annotation['plddt']), 2)}")
-# Aim for > 50 seems ok
+# Predict ligand binding sites using the "InteracDome" approach
+b = Binding(model, 'representable')
+b.predict_binding_(pfam)
+binding = b.get_binding('PF00405.16', 'FE')
+fe = [i for i, j in enumerate(binding) if j > .5]
 
-# Overlay the 5 models AlphaFold2 generates to assess model variation
-view = plot_alphafold(af)
-view.show()
+ly = Layout(model)
+# select
+fe_ = ly.select(residues=fe)
+# style
+ly.geom_ribbon(color='#ffffff')
+ly.geom_ribbon(selection=fe_, color='red')
+ly.render().show()
 ```
 
-
 <p align="center">
-    <img src="img/alphafold.png" width="350">
+    <img src="img/active2.png" width="350">
 </p>
-
 
 ```python
-# We can color properties of the residues in our structure.
-# What is available out of the box?
-print(f'Available annotations: {list(model.annotation.keys())}')
+# Test for spatial signal in residues that are e. g. mutated or under positive
+# natural selection. Here we use residues from Barber et al., Science, 2014
+# (https://www.science.org/doi/10.1126/science.1259329) that are under positive
+# selection.
+original = [153, 253, 382, 434, 435, 436, 439, 558, 574, 575, 576, 591, 592, 593, 614, 617, 619, 625]
 
-# Color protein from N (violet) to C terminus (red)
-# Colormaps are from matplotlib: 
-# https://matplotlib.org/stable/tutorials/colors/colormaps.html
-view = plot_annotation(model, label='position', palette='rainbow')
-view.show()
+# -1 bc/ positions from manuscript are 1-based 
+barber2014 = [i-1 for i in original]
+selection = [1 if i in barber2014 else 0 for i in range(len(model))]
+
+# (1) Spatial autocorrelation, i. e. "hotspots" in selected features, here using
+# the Getis-Ord metric.
+FDR = 0.05
+hotspots = find_hotspots(
+    model,
+    selection,
+    method='getis_ord',
+    angstrom=8,
+    false_discovery_rate=FDR,
+    test_two_sided=False)
+
+# (2) Point density analysis, here using HDBSCAN.
+clusters = cluster(model, hotspots, min_cluster_size=5)
+
+# Annotate model
+model.annotate_many_({
+    'selection': selection,
+    'hotspots': hotspots,
+    'clusters': clusters})
+
+# Build figure like a layer cake
+ly = Layout(model, panel_size=(200, 200), grid=(1, 3), linked=True)
+
+pos = ly.select(residues=barber2014, elements=['CA'], chain='A')
+
+ly.geom_ribbon(color='#ffffff')
+ly.geom_sphere(selection=pos, color='black')
+ly.geom_surface('hotspots', palette='binary', panel=(0, 1))
+ly.geom_surface('clusters', palette='Set2_r', panel=(0, 2))
+ly.render().show()
 ```
 
-
 <p align="center">
-    <img src="img/NtoC.png" width="350">
+    <img src="img/hotspots.png" width="350">
 </p>
 
-
+From here, `faltwerk` allows to easily interact with downstream tools like `altair` for visualisation of features or `pysal` for spatial regression (see notebook `example.ipynb`)
 
 ```python
-# Generate an MSA, e.g. here we used MAFFT
-# linsi data/Cfvo_O50_ompA.fa > data/msa.faa"
-fp = 'data/msa.faa'
-ref = 'PPFHKHLK_00058 porin [the longest copy, i.e. the actual ompA]'
-
-model.annotate_('variation', [1-i for i in load_conserved(fp, ref)])
-view = plot_annotation(model, 'variation', 'viridis')
-view.show()
+df = pd.DataFrame.from_dict(
+    flatten(model.annotation, expected_track_length=len(model)))
 ```
-
-
-<p align="center">
-    <img src="img/variation.png" width="350">
-</p>
-
-
-
-### Advanced usage
-
-A really cool idea is to map those parts of Pfam domains that are known (experimentally validated) to interact with ligands (ions, peptides, DNA, ...) to protein sequence and then see what spatial pattern this corresponds to when the sequence is folded into three dimensions:
-
-- https://academic.oup.com/nar/article/47/2/582/5232439
-- https://merenlab.org/2020/07/22/interacdome/
-- https://www.biorxiv.org/content/10.1101/2022.03.02.482602v1
-
-You can now do this in `foldspace` with little effort. To illustrate, let's mark all residues that are involved in the binding of zinc ions in the zinc finger protein (which binds three zinc atoms); see also `example_ligands.ipynb`:
-
-```python
-from foldspace.models import AlphaFold, Binding
-from foldspace.vis import *
-
-# TODO: Adjust file path
-fp = 'data/Pfam-A.hmm'
-
-# Load best zinc finger model from AF2 prediction
-af = AlphaFold('data/1AAY_alphafold')
-best = af.models[1]
-
-# Search bindin domains and align them to protein
-b = Binding(best, 'confident')
-b.predict_binding_(fp)
-
-# What domains have been found? Which ligands can be visualized?
-b.domains
-b.ligands
-
-# Map binding frequencies to protein
-bf = b.get_binding('PF00096.25', 'ZN')
-best.annotate_('bf', bf)
-
-view = plot_annotation(best, 'bf', palette='viridis', surface=True, opacity=1.)
-view.show()
-```
-
-<p align="center">
-    <img src="img/ligands.png" width="350">
-</p>
-

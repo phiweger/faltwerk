@@ -164,12 +164,20 @@ def get_complex_interface(cx, angstrom=10):
 
 def distance_to_positions(model, positions):
     '''
+    import altair as alt
+
     from foldspace.models import Complex
     from foldspace.geometry import get_complex_interface, distance_to_positions
 
     cx = Complex('/path/to/model.pdb')
     interface = get_complex_interface(cx, 10)
     distance_to_interface = distance_to_positions(model, interface)
+    df['distance_to_interface'] = distance_to_interface
+    
+    alt.Chart(df).mark_boxplot(extent=1.5).encode(
+        x='selection:O',
+        y='distance_to_interface:Q',
+    )
     '''
     atoms = list(get_alpha_carbon_atoms(model, only_coords=True))
     l = []

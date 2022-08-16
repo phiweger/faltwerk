@@ -69,7 +69,7 @@ def load_conserved(fp, ref=None, metric=mean_pairwise_similarity):
     return l
 
 
-def read_pdb(fp: Union[str, Path], name: str='x') -> Structure:
+def read_pdb(fp: Union[str, Path], name: str='x', strict: bool=True) -> Structure:
     '''
     # https://biopython.org/wiki/The_Biopython_Structural_Bioinformatics_FAQ
 
@@ -97,7 +97,8 @@ def read_pdb(fp: Union[str, Path], name: str='x') -> Structure:
         for chain in model:
             counts['chains'] += 1
 
-    assert sum(counts.values()) == 2, 'More than one model or chain present'
+    if strict:
+        assert sum(counts.values()) == 2, 'More than one model or chain present'
 
     return structure
 

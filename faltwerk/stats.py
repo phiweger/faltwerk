@@ -71,8 +71,10 @@ def cluster(fold, mask, method='HDBSCAN', **kwargs):
     from faltwerk.stats import cluster
     from faltwerk.geometry import get_alpha_carbon_atoms
 
-    mask = [1 if i < 0.05 else 0 for i in d['meme']['positive']['scores']]
+    Usage:
+
     cluster(model, mask, min_cluster_size=2)
+    cluster(model, hotspots, method='MCL', angstrom=8)
     '''
     assert all([i in set([0, 1, False, True]) for i in set(mask)]), \
     'Ambiguous mask, only (0, 1) or boolean allowed'

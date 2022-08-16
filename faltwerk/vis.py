@@ -122,7 +122,7 @@ class Layout():
     
     https://stackoverflow.com/questions/41817578/basic-method-chaining
     '''
-    def __init__(self, fold=None, panel_size=(200, 200), grid=(1, 1), linked=True):
+    def __init__(self, fold=None, panel_size=(400, 300), grid=(1, 1), linked=True, src='https://3dmol.org/build/3Dmol.js'):
         self.fold = fold
         
         # Create panel map, which tracks which vis is applied in which panel of the layout
@@ -135,7 +135,8 @@ class Layout():
             width=panel_size[0]*grid[1],
             height=panel_size[1]*grid[0],
             linked=linked,
-            viewergrid=grid)
+            viewergrid=grid,
+            js=src)
         stream = self.fold.to_stream()
         view.addModel(stream, 'pdb')
         self.view = view

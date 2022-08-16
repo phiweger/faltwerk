@@ -24,7 +24,7 @@ class Complex():
     '''
     def __init__(self, fp, quiet=True):
         self.path = Path(fp)
-        self.structure = read_pdb(self.path)
+        self.structure = read_pdb(self.path, strict=False)
         self.chains = []
         self.annotation = {}
         
@@ -60,13 +60,13 @@ class Complex():
 
 
 class Fold():
-    def __init__(self, fp, quiet=True, annotate=True):
+    def __init__(self, fp, quiet=True, annotate=True, strict=True):
         self.path = Path(fp)
 
         if not quiet:
             print(f'Loading structure in {self.path.name}')
         self.sequence = self.read_sequence(self.path)
-        self.structure = read_pdb(self.path)
+        self.structure = read_pdb(self.path, strict=strict)
         # structure > model > chain > residue > atom
         self.transformed = False
         self.annotation = {}
@@ -136,13 +136,23 @@ class Fold():
 
     def annotate_(self, key, values, check=True):
         if check:
-            assert len(values) == len(self), 'No 1:1 mapping of labels to positions'
+            assert len(values) == len(self), f'No 1:1 mapping of labels to positions for key "{key}"'
         self.annotation[key] = values
+        return None
+
+    def annotate_many_(self, many):
+        for k, v in many.items():
+            self.annotate_(k, v)
         return None
 
     def select(self):
         '''
         Assume one model and one chain?
+
+        structure > model > chain > residue > atom
+        
+        currently, there are no eg atom objects implemented in py3Dmol:
+        https://github.com/3dmol/3Dmol.js/issues/498
 
         select: 
         0:A::CA
@@ -175,10 +185,11 @@ class AlphaFold():
         self.workdir = workdir
 
         for n, i in enumerate(self.read_alphafold(indir, workdir)):
-            self.models[n+1] = i
+            self.models[n] = i
+
+        self.best = self.models[0]
         
         return None
-
 
     def read_alphafold(self, filedir, outdir=None):
         '''
@@ -265,6 +276,8 @@ class Binding():
             'non-redundant': 'InteracDome_v0.3-representableNR.tsv',
             }
         self.interactions = self.read_interactions(self.options[option])
+        self.domains = None
+        self.ids = None
 
     def read_interactions(self, fn):
         fp = Path(__file__).parents[1] / f'data/ligands/{fn}'
@@ -273,6 +286,7 @@ class Binding():
 
     def predict_binding_(self, hmms):
         self.domains = search_domains(self.fold, hmms)
+        self.ids = set(self.domains['acc'])
         # TODO: filter?
 
         # Note: By using a set we assume there are no two domain: ligand pairs
@@ -301,7 +315,8 @@ class Binding():
         Returns binding frequencies for protein sequence of fold
         '''
         # Get binding frequencies for (domain, ligand) pair
-        result = np.zeros(len(self.fold))
+        if not isinstance(self.domains, pd.DataFrame):
+            raise ValueError('Please annotate domains first using "predict_binding_()"')
 
         n = self.interactions
         bf = list(map(float, n[(n['pfam_id'] == self._pfam_map[domain]) & (n['ligand_type'] == ligand)]['binding_frequencies'].item().split(',')))
@@ -309,6 +324,7 @@ class Binding():
         df = self.domains
         # We can have multiple domain hits in one protein, even of the same
         # domain, think zinc finger (PDB 1AAY).
+        result = np.zeros(len(self.fold))
         for _, i in df[df['acc'] == domain].iterrows():
             # We reverse the vector so when we pop()
             u = bf[::-1]
@@ -334,7 +350,31 @@ class Binding():
             result[i.ali_start-1:i.ali_stop] = v
 
         return result
-            
+
+    def get_domain(self, domain):
+        '''
+        Returns vector of residue positions with 1 where domain present and
+        0 otherwise.
+
+        for i in b.ids:
+            _ = b.get_domain(i)
+        '''
+        
+        if not isinstance(self.domains, pd.DataFrame):
+            raise ValueError('Please annotate domains first using "predict_binding_()"')
+
+        # q = 'PF00405.16'
+        ranges = []
+        for i in b.domains[b.domains['acc'] == q].itertuples():
+            ranges.append([i.ali_start, i.ali_stop])
+    
+        result = np.zeros(len(self.fold))
+        for r in ranges:
+            for i in range(*r):
+                result[i] = 1
+
+        return result
+
 
         
 

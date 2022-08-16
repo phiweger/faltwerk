@@ -1,0 +1,13 @@
+channels:
+  - bioconda
+  - conda-forge
+  - default
+  - salilab
+dependencies:
+  - python=3.9
+  - jupyter
+  - notebook
+  - foldseek=3.915ef7d
+  - hmmer
+  - dssp
+  - biopython
