@@ -133,7 +133,7 @@ ly.render().show()
 ```
 
 <p align="center">
-    <img src="img/hotspots.png" width="350">
+    <img src="img/hotspots.png" width="700">
 </p>
 
 From here, `faltwerk` allows to easily interact with downstream tools like `altair` for visualisation of features or `pysal` for spatial regression (see notebook `example.ipynb`)
