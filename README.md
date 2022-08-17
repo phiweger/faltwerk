@@ -31,7 +31,7 @@ chmod +x install.sh
 wget http://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam31.0/Pfam-A.hmm.dat.gz
 wget http://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam31.0/Pfam-A.hmm.gz
 gunzip *
-hmmpress Pfam-A.hmm.gz
+hmmpress Pfam-A.hmm
 ```
 
 

@@ -10,7 +10,7 @@ SHELL_NAME=bash
 conda init $SHELL_NAME
 
 conda env create -y -n $ENV_NAME --file install/requirements.yml
-conda activate $NAME
+conda activate $ENV_NAME
 
 pip install -r install/more_requirements.txt
 
@@ -24,5 +24,4 @@ pip install -e .
 conda deactivate
 conda clean -a
 
-
-
+conda activate $ENV_NAME
