@@ -5,8 +5,10 @@ channels:
   - salilab
 dependencies:
   - python=3.9
+  - nodejs
   - jupyter
   - notebook
+  - jupyterlab
   - foldseek=3.915ef7d
   - hmmer
   - dssp

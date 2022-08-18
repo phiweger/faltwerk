@@ -23,18 +23,23 @@ setup(
     tests_require=['pytest'],
 
     install_requires=[
-        # 'click',
-        # 'numpy',
-        # 'pandas',
-        # 'tqdm',
-        # # 'pysam==0.15.1',
-        # 'scikit-learn',
-        # 'pybedtools==0.7.10',
-        # relies on pysam
-        # https://github.com/pysam-developers/pysam/issues/697
-        # 'gensim',
-        # current version ==3.7.1
-        # 'faiss-cpu==1.5.0',
+        'screed',
+        'tqdm',
+        'py3dmol',
+        'markov-clustering',
+        'hdbscan',
+        'pdb-tools',
+        'altair',
+        'vega_datasets',
+        'networkx',
+        'numpy',
+        'pandas',
+        'matplotlib',
+        'pytest',
+        'libpysal',
+        'spreg',
+        'esda',
+        'geopandas',
     ],
 
     # https://click.palletsprojects.com/en/7.x/setuptools/#testing-the-script
