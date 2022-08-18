@@ -190,7 +190,7 @@ class Layout():
         }
         
         if not key:
-            style = {'cartoon': {'color': color} | properties}
+            style = {'cartoon': {'color': color, **properties}}
             # self.build[panel].append([selection, style])
             _ = self.add_to_build('ribbon', panel, [selection, style])
             return self
@@ -248,7 +248,7 @@ class Layout():
 
         if not key:
             # self.view.addSurface('VDW', {'opacity': opacity, 'color': 'blue'}, selection, viewer=panel)
-            style = {'color': color} | properties
+            style = {'color': color, **properties}
             _ = self.add_to_build('surface', panel, [surface_type, style, selection])
             # TODO
             # _ = self.add_to_build('surface', panel, ['VWD', style, selection])
@@ -268,7 +268,7 @@ class Layout():
         
         # Note how the selection here goes _after_ the style spec; not sure if this is by design or accidental.
         # self.view.addSurface('VDW', {'opacity': opacity, 'colorscheme': {'prop': 'resi', 'map': cmap}}, selection, viewer=panel)
-        style = {'colorscheme': {'prop': 'resi', 'map': cmap}} | properties
+        style = {'colorscheme': {'prop': 'resi', 'map': cmap}, **properties}
         _ = self.add_to_build('surface', panel, [surface_type, style, selection])
         # pdb.set_trace()
         return self
@@ -282,7 +282,7 @@ class Layout():
             'radius': radius
         }
     
-        style = {'sphere': {'color': color} | properties}
+        style = {'sphere': {'color': color, **properties}}
         _ = self.add_to_build('sphere', panel, [selection, style])
         return self
     
