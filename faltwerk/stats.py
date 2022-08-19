@@ -42,7 +42,11 @@ def find_hotspots(model, features, method: Literal['getis_ord', 'moran'] = 'geti
     ca = list(get_alpha_carbon_atoms(model, only_coords=True))
     dist = DistanceBand(ca, angstrom, p=2, binary=True)
     # <star> .. include the present observation, see Getis and Ord, 1992
-    
+
+    # Cast to float otherwise G_Local() etc. cause problems when np is compiled
+    # with numba to C bc/ it does not allow mixed types.
+    features = np.array(features, dtype='float')
+
     if method == 'getis_ord':
         local = G_Local(features, dist, 'B', permutations=1000, star=True)
     

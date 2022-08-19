@@ -9,7 +9,7 @@ with open('README.md', 'r') as fh:
 
 setup(
     name='faltwerk',
-    version='0.2c',
+    version='0.2.32',
     author='Adrian Viehweger',
     author_email='adrian.viehweger@medizin.uni-leipzig.de',
     description='Spatial analysis of protein structures',
@@ -44,9 +44,21 @@ setup(
 
     # https://click.palletsprojects.com/en/7.x/setuptools/#testing-the-script
     # https://click.palletsprojects.com/en/7.x/setuptools/#scripts-in-packages
-    packages=find_packages(),
+    # packages=find_packages(),
     # entry_points='''
     #     [console_scripts]
     #     nanotext=nanotext.__main__:cli
     # ''',
+    packages=['faltwerk'],
+    include_package_data=True,
+    # package_data={'faltwerk': ['faltwerk/data/ligands/*.tsv']},
+
+    # data_files=[
+    #     ('interacdome', [
+    #         'data/ligands/InteracDome_v0.3-confident.tsv',
+    #         'data/ligands/InteracDome_v0.3-representableNR.tsv',
+    #         'data/ligands/InteracDome_v0.3-representable.tsv',
+    #         ]
+    #     )
+    # ],
 )

@@ -3,6 +3,7 @@ from copy import deepcopy
 import io
 import json
 from pathlib import Path
+import pkg_resources
 import re
 try:
     from typing import Union
@@ -287,7 +288,8 @@ class Binding():
         self.ids = None
 
     def read_interactions(self, fn):
-        fp = Path(__file__).parents[1] / f'data/ligands/{fn}'
+        fp = pkg_resources.resource_filename('faltwerk', f'/data/ligands/{fn}')
+        # fp = Path(__file__).parents[1] / f'data/ligands/{fn}'
         df = pd.read_csv(fp, sep='\t', comment='#')
         return df
 

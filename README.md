@@ -1,14 +1,12 @@
 ## Faltwerk
 
-`faltwerk` is a library for spatial exploratory data analysis of protein structures. It helps parse them, select items of interest, generate and visualise various protein annotations, and then provide convenient interfaces for downstream tools to perform e. g. as spatial regression. The most convenient way to run `faltwerk` is in a `jupyter notebook`.
+`faltwerk` is a library for spatial exploratory data analysis of protein structures. It helps parse them, select items of interest, generate and visualise various protein annotations, and then provide convenient interfaces for downstream tools to run, for example, spatial regression. The most convenient way to run `faltwerk` is in a `jupyter notebook`. This REPL-like execution gives rapid feedback and can help form hypotheses. However, `faltwerk` also integrates nicely into workflows (no point and click required).
 
 <p align="center">
     <img src="img/cover.png" alt="Antifreeze protein (PDB 3OTM)" width="800">
 </p>
 
-_Why this library?_ Exploratory analysis of protein structures in a REPL such as `jupyter notebook`s and outside of point-and-click tools can be surprisingly annoying.
-
-By "exploratory", we mean spatial. The curious thing about proteins is that by design they are a linear string of residues, but then folds up into the functionally active structure. Nature selects on the 3D structure, but we typically analyse the linear sequence (DNA sequencing). `foldspace` really wants to bridge this gap (see specific use cases below).
+The curious thing about proteins is that they come as linear strings of residues, but then fold up into 3D structures, that represent the functionally active form of the molecule (the thing that "does stuff"). Correspondingly, nature most often selects on structure. However, many analyses (positive selection etc.) require the linear sequence. `faltwerk` bridges this gap (see specific use cases below).
 
 PRs and suggestions welcome! The awesome `Anvio` has a [structure module](https://merenlab.org/2018/09/04/getting-started-with-anvio-structure/), should you be dissatisfied with `faltwerk`. 
 
@@ -25,8 +23,8 @@ chmod +x install.sh
 # Get Pfam database (Version v31 -- this matters!)
 wget http://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam31.0/Pfam-A.hmm.dat.gz
 wget http://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam31.0/Pfam-A.hmm.gz
-gunzip *
-hmmpress Pfam-A.hmm.gz
+gunzip -q Pfam*
+hmmpress Pfam-A.hmm
 ```
 
 Now you should be able to run the local notebook:
