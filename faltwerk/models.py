@@ -4,7 +4,10 @@ import io
 import json
 from pathlib import Path
 import re
-from typing import Union
+try:
+    from typing import Union
+except ImportError:
+    from typing_extensions import Union
 
 from Bio import SeqIO
 from Bio.PDB.Structure import Structure
@@ -13,7 +16,11 @@ import pandas as pd
 
 from faltwerk.io import read_pdb, save_pdb
 from faltwerk.parsers import HMMERStandardOutput
-from faltwerk.utils import align_structures, search_domains, filter_aa
+from faltwerk.utils import (
+    align_structures,
+    search_domains, 
+    filter_aa,
+    )
 
 
 class Complex():

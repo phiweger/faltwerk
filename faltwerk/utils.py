@@ -3,7 +3,10 @@ from itertools import combinations
 from math import log, e
 from pathlib import Path
 import subprocess
-from typing import Union
+try:
+    from typing import Union
+except ImportError:
+    from typing_extensions import Union
 import tempfile
 
 from Bio import SeqUtils
@@ -156,6 +159,7 @@ def align_structures(query: Structure, target: Structure, mode=0, minscore=0.5):
     --tmscore-threshold [0.5]
     accept alignments with a tmsore > thr [0.0,1.0] [0.500]
     '''
+    assert is_tool('foldseek'), '"foldseek" appears not to be installed'
     tmp = tempfile.TemporaryDirectory()
     p = tmp.name
     print(f'Aligning {Path(target).name} to {Path(query).name}')
@@ -249,6 +253,8 @@ def mean_pairwise_similarity(labels):
 def search_domains(fold, hmms, cpus=8):
     # hmmsearch -A aln.stk --cpu 8 --cut_ga --tblout 1AAY.tsv --domtblout 1AAY.dom.tsv ../Pfam-A.hmm rcsb_pdb_1AAY.fasta > result.txt
 
+    assert is_tool('hmmsearch'), '"hmmsearch" appears not to be installed'
+
     tmp = tempfile.TemporaryDirectory()
     p = tmp.name
 
@@ -308,4 +314,12 @@ def flatten(d, parent_key='', sep='_', expected_track_length=None):
         return cleaned
                 
 
+def is_tool(name):
+    '''
+    Check whether <name> is on PATH and marked as executable.
 
+    https://stackoverflow.com/questions/11210104/check-if-a-program-exists-from-a-python-script
+    '''
+
+    from shutil import which
+    return which(name) is not None

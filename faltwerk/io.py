@@ -2,7 +2,10 @@ from collections import defaultdict
 from io import StringIO
 import json
 from pathlib import Path
-from typing import Union
+try:
+    from typing import Union
+except ImportError:
+    from typing_extensions import Union
 
 from Bio import PDB, SeqUtils
 from Bio.PDB import PDBIO, Structure

@@ -1,7 +1,10 @@
 # import shutil
 import subprocess
 import tempfile
-from typing import Union
+try:
+    from typing import Union
+except ImportError:
+    from typing_extensions import Union
 
 from Bio.PDB.Residue import Residue
 from Bio.PDB.Atom import Atom
