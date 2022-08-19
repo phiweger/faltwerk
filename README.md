@@ -3,19 +3,12 @@
 `faltwerk` is a library for spatial exploratory data analysis of protein structures. It helps parse them, select items of interest, generate and visualise various protein annotations, and then provide convenient interfaces for downstream tools to perform e. g. as spatial regression. The most convenient way to run `faltwerk` is in a `jupyter notebook`.
 
 <p align="center">
-    <img src="img/antifreeze.png" alt="Antifreeze protein (PDB 3OTM)" width="400">
+    <img src="img/cover.png" alt="Antifreeze protein (PDB 3OTM)" width="800">
 </p>
 
 _Why this library?_ Exploratory analysis of protein structures in a REPL such as `jupyter notebook`s and outside of point-and-click tools can be surprisingly annoying.
 
-By "exploratory", we mean spatial. The curious thing about proteins is that by design they are a linear string of residues, but then folds up into the functionally active structure. Nature selects on the 3D structure, but we typically analyse the linear sequence (DNA sequencing). `foldspace` really wants to bridge this gap. More specifically, here are some use cases:
-
-- Annotate solvent access, active centers and more
-- Some regions in the amino acid sequence are more conserved than others across species. Which regions in the 3D structure do they correspond to?
-- Are there any significant spatial hotspots where residues experience positive selection?
-- Do observed mutations cluster in any part of the protein, for example in regions that interface other proteins (protein binding sites) or active sites of the protein?
-- A hotspot/ cluster has been identified; which protein features if any can explain this occurance. For example, is the cluster associated with known protein-binding sites?
-- What's the spatial relationship between mutations deemed pathogenic and the annotated functional domains of a protein?
+By "exploratory", we mean spatial. The curious thing about proteins is that by design they are a linear string of residues, but then folds up into the functionally active structure. Nature selects on the 3D structure, but we typically analyse the linear sequence (DNA sequencing). `foldspace` really wants to bridge this gap (see specific use cases below).
 
 PRs and suggestions welcome! The awesome `Anvio` has a [structure module](https://merenlab.org/2018/09/04/getting-started-with-anvio-structure/), should you be dissatisfied with `faltwerk`. 
 
@@ -41,6 +34,7 @@ Now you should be able to run the local notebook:
 ```bash
 jupyter notebook examples/example_local.ipynb
 ```
+
 
 ### Usage
 
@@ -149,3 +143,13 @@ From here, `faltwerk` allows to easily interact with downstream tools like `alta
 df = pd.DataFrame.from_dict(
     flatten(model.annotation, expected_track_length=len(model)))
 ```
+
+
+## Use cases
+
+- Annotate solvent access, active centers and more
+- Some regions in the amino acid sequence are more conserved than others across species. Which regions in the 3D structure do they correspond to?
+- Are there any significant spatial hotspots where residues experience positive selection?
+- Do observed mutations cluster in any part of the protein, for example in regions that interface other proteins (protein binding sites) or active sites of the protein?
+- A hotspot/ cluster has been identified; which protein features if any can explain this occurance. For example, is the cluster associated with known protein-binding sites?
+- What's the spatial relationship between mutations deemed pathogenic and the annotated functional domains of a protein?
