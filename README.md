@@ -22,6 +22,8 @@ PRs and suggestions welcome! The awesome `Anvio` has a [structure module](https:
 
 ### Install
 
+Quick start using the [colab notebook](https://colab.research.google.com/github/phiweger/faltwerk/blob/master/examples/example_colab.ipynb).
+
 ```bash
 chmod +x install.sh
 ./install.sh
@@ -34,6 +36,11 @@ gunzip *
 hmmpress Pfam-A.hmm.gz
 ```
 
+Now you should be able to run the local notebook:
+
+```bash
+jupyter notebook examples/example_local.ipynb
+```
 
 ### Usage
 

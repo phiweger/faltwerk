@@ -9,7 +9,7 @@ with open('README.md', 'r') as fh:
 
 setup(
     name='faltwerk',
-    version='0.2b',
+    version='0.2c',
     author='Adrian Viehweger',
     author_email='adrian.viehweger@medizin.uni-leipzig.de',
     description='Spatial analysis of protein structures',
