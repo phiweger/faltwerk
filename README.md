@@ -19,7 +19,7 @@ Quick start using the [colab notebook](https://colab.research.google.com/github/
 
 ```bash
 # Dependencies
-!pip install faltwerk==0.2.36
+!pip install faltwerk==0.3
 # Install tools from upstream and downstream tasks
 !pip install -q pdb-tools altair vega_datasets spreg geopandas
 # More dependencies
