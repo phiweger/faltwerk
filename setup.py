@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import setup#, find_packages
 # https://packaging.python.org/tutorials/packaging-projects/
 # https://docs.pytest.org/en/latest/goodpractices.html
 
@@ -9,7 +9,7 @@ with open('README.md', 'r') as fh:
 
 setup(
     name='faltwerk',
-    version='0.2.32',
+    version='0.2.36',
     author='Adrian Viehweger',
     author_email='adrian.viehweger@medizin.uni-leipzig.de',
     description='Spatial analysis of protein structures',
@@ -23,23 +23,18 @@ setup(
     tests_require=['pytest'],
 
     install_requires=[
-        # 'screed',
-        # 'tqdm',
-        # 'py3dmol',
-        # 'markov-clustering',
-        # 'hdbscan',
-        # 'pdb-tools',
-        # 'altair',
-        # 'vega_datasets',
-        # 'networkx',
-        # 'numpy',
-        # 'pandas',
-        # 'matplotlib',
-        # 'pytest',
-        # 'libpysal',
-        # 'spreg',
-        # 'esda',
-        # 'geopandas',
+        'biopython==1.79',
+        'screed==1.0.5',
+        'py3Dmol==1.8.1',
+        'markov-clustering==0.0.6.dev0',
+        'hdbscan==0.8.28',
+        'networkx==2.6.3',
+        'numpy==1.21.6',
+        'pandas==1.3.5',
+        'matplotlib==3.5.3',
+        'pytest==7.1.2',
+        'libpysal==4.6.2',
+        'esda==2.4.3',
     ],
 
     # https://click.palletsprojects.com/en/7.x/setuptools/#testing-the-script

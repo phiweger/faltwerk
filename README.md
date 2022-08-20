@@ -1,3 +1,5 @@
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/phiweger/faltwerk/blob/master/examples/example_colab.ipynb)
+
 ## Faltwerk
 
 `faltwerk` is a library for spatial exploratory data analysis of protein structures. It helps parse them, select items of interest, generate and visualise various protein annotations, and then provide convenient interfaces for downstream tools to run, for example, spatial regression. The most convenient way to run `faltwerk` is in a `jupyter notebook`. This REPL-like execution gives rapid feedback and can help form hypotheses. However, `faltwerk` also integrates nicely into workflows (no point and click required).
@@ -16,21 +18,41 @@ PRs and suggestions welcome! The awesome `Anvio` has a [structure module](https:
 Quick start using the [colab notebook](https://colab.research.google.com/github/phiweger/faltwerk/blob/master/examples/example_colab.ipynb).
 
 ```bash
-chmod +x install.sh
-./install.sh
-# ... or just follow the steps therein manually
+# Dependencies
+!pip install faltwerk==0.2.36
+# Install tools from upstream and downstream tasks
+!pip install -q pdb-tools altair vega_datasets spreg geopandas
+# More dependencies
+!mamba install -q -y -c conda-forge -c bioconda foldseek=3.915ef7d hmmer
 
-# Get Pfam database (Version v31 -- this matters!)
-wget http://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam31.0/Pfam-A.hmm.dat.gz
-wget http://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam31.0/Pfam-A.hmm.gz
-gunzip -q Pfam*
-hmmpress Pfam-A.hmm
+# For local execution in a jupyter notebook
+pip install notebook
+jupyter notebook examples/example_local.ipynb
 ```
 
-Now you should be able to run the local notebook:
+It might be necessary to install a `jupyter` extension to visualize the proteins (you notice if they don't render). Please refer to the `py3Dmol` [install documentation](https://pypi.org/project/py3Dmol/) and [repo](https://github.com/3dmol/3Dmol.js) in this case. A typical setup that renders correctly looks like this (Linux and Mac tested):
 
 ```bash
-jupyter notebook examples/example_local.ipynb
+# ubuntu 20.04. LTS
+# Python 3.10.4
+
+node --version
+# v10.19.0
+
+jupyter --version
+# IPython          : 8.4.0
+# ipykernel        : 6.15.1
+# ipywidgets       : not installed
+# jupyter_client   : 7.3.4
+# jupyter_core     : 4.11.1
+# jupyter_server   : not installed
+# jupyterlab       : not installed
+# nbclient         : 0.6.6
+# nbconvert        : 6.5.3
+# nbformat         : 5.4.0
+# notebook         : 6.4.12
+# qtconsole        : not installed
+# traitlets        : 5.3.0
 ```
 
 
@@ -41,7 +63,7 @@ We assume that all protein structures contain a single, and if you are not analy
 To get an overview of what you can do with `faltwerk` and to interact with the data and code, we provide a notebook:
 
 ```bash
-jupyter notebook example.ipynb
+jupyter notebook examples/example_local.ipynb
 ```
 
 To give an idea of what it looks like to use `faltwerk`:

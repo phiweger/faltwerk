@@ -1,17 +1,5 @@
-screed
-tqdm
-py3dmol
-markov-clustering
-hdbscan
 pdb-tools
 altair
 vega_datasets
-networkx
-numpy
-pandas
-matplotlib
-pytest
-libpysal
 spreg
-esda
 geopandas
