@@ -9,9 +9,9 @@ try:
     from typing import Union
 except ImportError:
     from typing_extensions import Union
+import warnings
+warnings.filterwarnings('ignore')
 
-from Bio import SeqIO
-from Bio.PDB.Structure import Structure
 import numpy as np
 import pandas as pd
 
@@ -32,7 +32,7 @@ class Complex():
     '''
     def __init__(self, fp, quiet=True):
         self.path = Path(fp)
-        self.structure = read_pdb(self.path, strict=False)
+        self.structure, self.sequence = read_pdb(self.path, strict=False)
         self.chains = []
         self.annotation = {}
         
@@ -73,8 +73,7 @@ class Fold():
 
         if not quiet:
             print(f'Loading structure in {self.path.name}')
-        self.sequence = self.read_sequence(self.path)
-        self.structure = read_pdb(self.path, strict=strict)
+        self.structure, self.sequence = read_pdb(self.path, strict=strict)
         # structure > model > chain > residue > atom
         self.transformed = False
         self.annotation = {}
@@ -93,16 +92,6 @@ class Fold():
 
     def __iter__(self):
         yield from self.structure
-
-    def read_sequence(self, fp: Union[str, Path]):
-        # https://www.biostars.org/p/435629/
-        with open(fp, 'r') as file:
-            l = []
-            for record in SeqIO.parse(file, 'pdb-atom'):
-                l.append(record.seq)
-            if len(l) > 1:
-                print('Warning: More than one sequence found, returning first')
-            return l[0].__str__()
 
     def __len__(self):
         '''Number of amino acids in the sequence'''
@@ -224,7 +213,10 @@ class AlphaFold():
             d[fold] = v
     
         # Rank models by pLDDT, best is reference
-        ref, *queries = [i for i, j in sorted(d.items(), key=lambda x: x[1], reverse=True)]
+        try:
+            ref, *queries = [i for i, j in sorted(d.items(), key=lambda x: x[1], reverse=True)]
+        except ValueError:
+            raise FileNotFoundError()
 
         print(f'Best model (pLDDT): {ref.path.name}')
         print(f'Align remaining models to best and rename')

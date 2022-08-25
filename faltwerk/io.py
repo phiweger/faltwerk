@@ -1,7 +1,9 @@
 from collections import defaultdict
+import gzip
 from io import StringIO
 import json
 from pathlib import Path
+import tempfile
 try:
     from typing import Union
 except ImportError:
@@ -10,6 +12,7 @@ except ImportError:
 from Bio import PDB, SeqUtils
 from Bio.PDB import PDBIO, Structure
 from Bio.PDB.PDBParser import PDBParser
+from Bio import SeqIO
 import pandas as pd
 import screed
 
@@ -72,8 +75,29 @@ def load_conserved(fp, ref=None, metric=mean_pairwise_similarity):
     return l
 
 
+def is_gz_file(filepath):
+    '''
+    https://stackoverflow.com/questions/3703276/how-to-tell-if-a-file-is-gzip-compressed
+    '''
+    with open(filepath, 'rb') as test_f:
+        return test_f.read(2) == b'\x1f\x8b'
+
+
+def read_sequence(fp: Union[str, Path]):
+    # https://www.biostars.org/p/435629/
+    with open(fp, 'r') as file:
+        l = []
+        for record in SeqIO.parse(file, 'pdb-atom'):
+            l.append(record.seq)
+        if len(l) > 1:
+            print('Warning: More than one sequence found, returning first')
+        return l[0].__str__()
+
+
 def read_pdb(fp: Union[str, Path], name: str='x', strict: bool=True) -> Structure:
     '''
+    Return structure AND sequence
+
     # https://biopython.org/wiki/The_Biopython_Structural_Bioinformatics_FAQ
 
     p = PDBParser()
@@ -86,9 +110,20 @@ def read_pdb(fp: Union[str, Path], name: str='x', strict: bool=True) -> Structur
     '''
     fp = Path(fp)
     assert fp.exists()
+
+    # print(is_gz_file(fp))
+    if is_gz_file(fp):
+        tmp = tempfile.NamedTemporaryFile()
+
+        with gzip.open(fp) as file:
+            file_content = file.read()
+            tmp.write(file_content)
+            fp = Path(tmp.name)
+
     # https://biopython.org/wiki/The_Biopython_Structural_Bioinformatics_FAQ
     pdb_parser = PDB.PDBParser(QUIET=True, PERMISSIVE=0)
     structure = pdb_parser.get_structure(name, str(fp))
+    sequence = read_sequence(fp)
 
     counts = {
        'models': 0,
@@ -103,7 +138,12 @@ def read_pdb(fp: Union[str, Path], name: str='x', strict: bool=True) -> Structur
     if strict:
         assert sum(counts.values()) == 2, 'More than one model or chain present'
 
-    return structure
+    try:
+        tmp.close()
+    except NameError:
+        pass
+
+    return structure, sequence
 
 
 def load_bfactor_column(fp):
