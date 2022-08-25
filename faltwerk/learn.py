@@ -3,6 +3,7 @@ from multiprocess import Pool, cpu_count
 # https://stackoverflow.com/questions/41385708/multiprocessing-example-giving-attributeerror
 
 import numpy as np
+from tqdm import tqdm
 
 from faltwerk.geometry import get_foldseek_vae_states
 from faltwerk.models import Fold
@@ -26,7 +27,21 @@ def tokenize(fp):
     return np.array([tokens[i+j] for i, j in z])
 
 
+
+# from multiprocessing import Pool
+# import tqdm
+
+# pool = Pool(processes=8)
+# for _ in tqdm.tqdm(pool.imap_unordered(do_work, tasks), total=len(tasks)):
+#     pass
+
+
 def tokenize_many(files, threads=cpu_count()):
-    with Pool(5) as pool:
-        result = pool.map(tokenize, files)
-    return result
+    with Pool(threads) as pool:
+        # results = pool.map(tokenize, files)
+
+        results = []
+        for i in tqdm(pool.imap_unordered(tokenize, files), total=len(files)):
+            results.append(i)
+
+    return results
