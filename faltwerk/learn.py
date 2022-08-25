@@ -1,6 +1,7 @@
 from itertools import product
 from multiprocess import Pool, cpu_count
 # https://stackoverflow.com/questions/41385708/multiprocessing-example-giving-attributeerror
+# https://stackoverflow.com/questions/5666576/show-the-progress-of-a-python-multiprocessing-pool-imap-unordered-call
 
 import numpy as np
 from tqdm import tqdm
@@ -25,15 +26,6 @@ def tokenize(fp):
     model = Fold(fp)
     z = zip(model.sequence, get_foldseek_vae_states(model))
     return np.array([tokens[i+j] for i, j in z])
-
-
-
-# from multiprocessing import Pool
-# import tqdm
-
-# pool = Pool(processes=8)
-# for _ in tqdm.tqdm(pool.imap_unordered(do_work, tasks), total=len(tasks)):
-#     pass
 
 
 def tokenize_many(files, threads=cpu_count()):
