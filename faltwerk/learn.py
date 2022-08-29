@@ -6,7 +6,10 @@ from multiprocess import Pool, cpu_count
 import numpy as np
 from tqdm import tqdm
 
-from faltwerk.geometry import get_foldseek_vae_states
+from faltwerk.geometry import (
+    get_foldseek_vae_states,
+    get_foldseek_vae_states_from_path,
+    )
 from faltwerk.models import Fold
 
 
@@ -17,10 +20,8 @@ tokens = {i+j: n+1 for n, (i, j) in enumerate(product(alphabet, alphabet))}
 assert len(tokens) == len(alphabet)**2
 
 
-def tokenize(fp):
+def tokenize_states_and_seq(fp):
     '''
-    TODO: Don't initialize lookup table every time
-
     Turn the model's states and aa sequence into tokens
     '''
     model = Fold(fp)
@@ -28,12 +29,9 @@ def tokenize(fp):
     return np.array([tokens[i+j] for i, j in z])
 
 
-def tokenize_many(files, threads=cpu_count()):
+def process_many(files, fn=tokenize_states_and_seq, threads=cpu_count()):
     with Pool(threads) as pool:
-        # results = pool.map(tokenize, files)
-
         results = []
-        for i in tqdm(pool.imap_unordered(tokenize, files), total=len(files)):
+        for i in tqdm(pool.imap_unordered(fn, files), total=len(files)):
             results.append(i)
-
     return results

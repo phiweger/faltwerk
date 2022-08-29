@@ -12,6 +12,8 @@ from libpysal.weights import DistanceBand
 import numpy as np
 import screed
 
+from faltwerk.models import Fold
+
 
 def get_alpha_carbon_atoms(fold, only_coords=False):
     '''
@@ -107,6 +109,14 @@ def get_foldseek_vae_states(fold):
     # shutil.copyfile(f'{p}/db_ss.fasta', outfile)
     with screed.open(f'{p}/db_ss.fasta') as file:
        return next(file).sequence
+
+
+def get_foldseek_vae_states_from_path(fp):
+    '''
+    Turn the model's states and aa sequence into tokens
+    '''
+    model = Fold(fp)
+    return get_foldseek_vae_states(model)
 
 
 def distance_to_closest_active_site(fold, binding_frequencies, threshold=0.5):

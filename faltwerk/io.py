@@ -14,6 +14,7 @@ from Bio.PDB import PDBIO, Structure
 from Bio.PDB.PDBParser import PDBParser
 from Bio import SeqIO
 import pandas as pd
+import requests
 import screed
 
 from faltwerk.utils import entropy, mean_pairwise_similarity
@@ -206,3 +207,15 @@ def parse_hyphy(fp, method='meme', direction='positive', skip=[]):
 
     return scores
 
+
+def get_alphafold2_model_from_ena(ID=None, fp=None):
+    # eg AF-Q09428-F1
+    url = f'https://alphafold.ebi.ac.uk/files/{ID}-model_v3.pdb'
+    r = requests.get(url)
+    assert r.status_code == 200, 'Download failed'
+    pdb = r.text
+    if not fp:
+        fp = f'{ID}.pdb'
+    with open(fp, 'w+') as out:
+        out.write(pdb)
+    return None
