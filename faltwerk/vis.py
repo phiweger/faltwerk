@@ -273,13 +273,14 @@ class Layout():
         # pdb.set_trace()
         return self
     
-    def geom_sphere(self, selection=None, key='position', color='black', radius=2, panel=(0, 0)):
+    def geom_sphere(self, selection=None, key='position', color='black', opacity=1, radius=2, panel=(0, 0)):
         
         if not selection:
             selection = self.select()
     
         properties = {
-            'radius': radius
+            'radius': radius,
+            'opacity': opacity,
         }
     
         style = {'sphere': {'color': color, **properties}}
