@@ -24,6 +24,11 @@ from faltwerk.utils import (
     )
 
 
+
+# TODO: Complex(fp, one_fold_per='chain')
+# or
+# folds = cx.split_into_folds()
+# subset chain, to stream, load into fold (from_stream=True)
 class Complex():
     '''
     AF2 will predict complexes and name them chain A .. n

@@ -2,9 +2,9 @@
 import subprocess
 import tempfile
 try:
-    from typing import Union
+    from typing import Union, List
 except ImportError:
-    from typing_extensions import Union
+    from typing_extensions import Union, List
 
 from Bio.PDB.Residue import Residue
 from Bio.PDB.Atom import Atom
@@ -12,7 +12,7 @@ from libpysal.weights import DistanceBand
 import numpy as np
 import screed
 
-from faltwerk.models import Fold
+from faltwerk.models import Fold, Complex
 
 
 def get_alpha_carbon_atoms(fold, only_coords=False):
@@ -144,7 +144,7 @@ def distance_to_closest_active_site(fold, binding_frequencies, threshold=0.5):
     return l
 
 
-def get_complex_interface(cx, angstrom=10):
+def get_complex_interface(cx: Union[Complex, List], angstrom=10):
     '''
     from foldspace.models import Complex
     from foldspace.geometry import get_complex_interface
@@ -154,7 +154,13 @@ def get_complex_interface(cx, angstrom=10):
     '''
     coords = []
     labels = []
-    for chain in cx.chains:
+
+    if type(cx) == Complex:
+        chains = cx.chains
+    else:
+        chains = cx
+
+    for chain in chains:
         # TODO: Add a more general iterator, for both complexes and single folds
         for atom in chain.get_atoms():
             if atom.get_id() == 'CA':
@@ -162,14 +168,14 @@ def get_complex_interface(cx, angstrom=10):
                 labels.append(chain.id)
                 
     lu = {i: j for i, j in enumerate(labels)}
-    dist = DistanceBand(coords, 10, p=2, binary=True)
-    assert len(dist.neighbors.keys()) == len(cx)
+    dist = DistanceBand(coords, angstrom, p=2, binary=True)
+    # assert len(dist.neighbors.keys()) == len(cx)
     
     interface = set()
     for k, v in dist.neighbors.items():
         origin = lu[k]
         for i in v:
-            if lu[i] != origin and origin == 'B':
+            if lu[i] != origin: # and origin == 'B':
                 interface.add(k)
     
     return interface
