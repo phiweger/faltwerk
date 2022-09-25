@@ -15,11 +15,15 @@ import screed
 from faltwerk.models import Fold, Complex
 
 
-def get_alpha_carbon_atoms(fold, only_coords=False):
+def get_alpha_carbon_atoms(x: Union[Atom, Residue], only_coords=False):
     '''
     alpha carbon: https://foldit.fandom.com/wiki/Alpha_carbon
     '''
-    for res in fold.structure.get_residues():
+    if type(x) == Fold:
+        residues = x.structure.get_residues()
+    else:
+        residues = x.get_residues()
+    for res in residues:
         l = []
         for i in res.get_atoms():
             # There is only one alpha carbon per amino acid.
@@ -144,7 +148,7 @@ def distance_to_closest_active_site(fold, binding_frequencies, threshold=0.5):
     return l
 
 
-def get_complex_interface(cx: Union[Complex, List], angstrom=10):
+def get_complex_interface(cx: Union[Complex, List], angstrom=10, map_to_chains=False):
     '''
     from foldspace.models import Complex
     from foldspace.geometry import get_complex_interface
@@ -154,6 +158,7 @@ def get_complex_interface(cx: Union[Complex, List], angstrom=10):
     '''
     coords = []
     labels = []
+    ix_residues = []
 
     if type(cx) == Complex:
         chains = cx.chains
@@ -166,8 +171,12 @@ def get_complex_interface(cx: Union[Complex, List], angstrom=10):
             if atom.get_id() == 'CA':
                 coords.append(get_coordinate(atom))
                 labels.append(chain.id)
+                # For each chain, residue numbering starts at 1
+                ix_residues.append(atom.parent.id[1])
                 
-    lu = {i: j for i, j in enumerate(labels)}
+    lu = {i: j for i, j in enumerate(labels)}  # lu .. lookup
+    lu_res = {i: j for i, j in enumerate(zip(labels, ix_residues))}  # lu .. lookup
+
     dist = DistanceBand(coords, angstrom, p=2, binary=True)
     # assert len(dist.neighbors.keys()) == len(cx)
     
@@ -178,7 +187,11 @@ def get_complex_interface(cx: Union[Complex, List], angstrom=10):
             if lu[i] != origin: # and origin == 'B':
                 interface.add(k)
     
-    return interface
+    if map_to_chains:
+        return [(k, lu_res[k]) for k in interface]
+    else:
+        return interface
+
 
 
 def distance_to_positions(model, positions):
