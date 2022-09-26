@@ -159,6 +159,7 @@ def get_complex_interface(cx: Union[Complex, List], angstrom=10, map_to_chains=F
     coords = []
     labels = []
     ix_residues = []
+    pairwise = []
 
     if type(cx) == Complex:
         chains = cx.chains
@@ -186,9 +187,10 @@ def get_complex_interface(cx: Union[Complex, List], angstrom=10, map_to_chains=F
         for i in v:
             if lu[i] != origin: # and origin == 'B':
                 interface.add(k)
+                pairwise.append([lu_res[k], lu_res[i]])
     
     if map_to_chains:
-        return [(k, lu_res[k]) for k in interface]
+        return [(k, lu_res[k]) for k in interface], pairwise
     else:
         return interface
 

@@ -13,6 +13,7 @@ from Bio import PDB, SeqUtils
 from Bio.PDB import PDBIO, Structure
 from Bio.PDB.PDBParser import PDBParser
 from Bio import SeqIO
+import numpy as np
 import pandas as pd
 import requests
 import screed
@@ -124,7 +125,7 @@ def read_pdb(fp: Union[str, Path], name: str='x', strict: bool=True) -> Structur
     # https://biopython.org/wiki/The_Biopython_Structural_Bioinformatics_FAQ
     pdb_parser = PDB.PDBParser(QUIET=True, PERMISSIVE=0)
     structure = pdb_parser.get_structure(name, str(fp))
-    sequence = read_sequence(fp)
+    # sequence = read_sequence(fp)
 
     counts = {
        'models': 0,
@@ -134,6 +135,7 @@ def read_pdb(fp: Union[str, Path], name: str='x', strict: bool=True) -> Structur
     for model in structure:
         counts['models'] += 1
         for chain in model:
+            # TODO: If multiple, could return all here
             counts['chains'] += 1
 
     if strict:
@@ -144,7 +146,8 @@ def read_pdb(fp: Union[str, Path], name: str='x', strict: bool=True) -> Structur
     except NameError:
         pass
 
-    return structure, sequence
+    # return structure, sequence
+    return structure
 
 
 def load_bfactor_column(fp):
@@ -187,7 +190,6 @@ def parse_hyphy(fp, method='meme', direction='positive', skip=[]):
         assert direction == 'positive', 'The MEME method does not estimate negative selection'
         scores = [i[6] for i in d['MLE']['content']['0']]
         
-
     elif method == 'fubar':
         # posterior probability
         neg, pos = zip(*[i[3:5] for i in d['MLE']['content']['0']])
@@ -219,3 +221,17 @@ def get_alphafold2_model_from_ena(ID=None, fp=None):
     with open(fp, 'w+') as out:
         out.write(pdb)
     return None
+
+
+def load_scores(fp):
+    '''
+    Expects pLDDT scores as output by ColabFold.
+    '''
+    with open(fp, 'r') as file:
+        scores = json.load(file)
+    return scores
+
+
+
+
+

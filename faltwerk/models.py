@@ -15,14 +15,14 @@ warnings.filterwarnings('ignore')
 import numpy as np
 import pandas as pd
 
-from faltwerk.io import read_pdb, save_pdb
+from faltwerk.io import read_pdb, save_pdb, load_scores
 from faltwerk.parsers import HMMERStandardOutput
 from faltwerk.utils import (
     align_structures,
-    search_domains, 
     filter_aa,
+    get_sequence,
+    search_domains,
     )
-
 
 
 # TODO: Complex(fp, one_fold_per='chain')
@@ -31,30 +31,68 @@ from faltwerk.utils import (
 # subset chain, to stream, load into fold (from_stream=True)
 class Complex():
     '''
-    AF2 will predict complexes and name them chain A .. n
-
+    Datastructure to deal with a multiple chain
+    
     TODO: A Complex object should be made up of two or more Fold objects
     '''
-    def __init__(self, fp, quiet=True):
+    def __init__(self, fp, scores=None):
         self.path = Path(fp)
-        self.structure, self.sequence = read_pdb(self.path, strict=False)
-        self.chains = []
-        self.annotation = {}
-        
-        for chain in next(iter(self.structure)):
-            # for model in structure, for chain in model, ...
-            self.chains.append(chain)
 
-        positions = []
-        for chain in self.chains:
-            print(chain)
-            aa = filter_aa(chain)
-            p = [i+1 for i in range(len(aa))]
+        # TODO: This will only read in the first sequence! Thus
+        # cx.sequence does not hold all sequences
+        self.structure = read_pdb(self.path, strict=False)
+        
+        self.chains = {}
+
+        original_ix = []
+        for chain in self.structure.get_chains():
+            self.chains[chain.id] = chain
+            original_ix.extend([i for i in range(len(chain))])
+
+
+        self.annotation = {}
+
+        # Positions for the overall complex are sorted by name. So if there
+        # are chains (B, C, D) then 0 marks the first position in B.
+        positions, names = [], []
+        for chain in [v for (k, v) in sorted(self.chains.items())]:
+            # print(chain)
+            # aa = filter_aa(chain)
+            
+            # TODO: i+1 bc/ 3Dmol.js and PDB count positions from 1?
+            # We go with 0-based here bc/ pythonic and intuitive.
+            p, q = zip(*[(i, chain.id) for i in range(len(chain))])
             positions.extend(p)
+            names.extend(q)
 
         self.len = len(positions)
-        self.annotate_('position', positions)
+
+        assert original_ix == positions, 'Unsorted PDB file'
+        self.annotate_('positions', positions)
+        self.annotate_('chains', names)
+
+        # In complexes, there is the index position, and the relative one of the
+        # chain.
+        self.scores = {}
+        if scores:
+            sc = load_scores(scores)
+            for k, v in sc.items():
+                try:
+                    self.annotate_(k, v)
+                except TypeError:
+                    # Skip single values like "max_pae"
+                    continue
         return None
+
+    def get_chains(self):
+        v = self.chains.values()
+        for chain in v:
+            sorted_chains = [x for _, x in sorted(
+                zip([len(i) for i in v], v),
+                key=lambda x: x[0],
+                reverse=True
+                )]
+            return sorted_chains
 
     def annotate_(self, key, values, check=True):
         if check:
@@ -73,23 +111,24 @@ class Complex():
 
 
 class Fold():
+    '''
+    Datastructure to deal with a single chain
+    '''
     def __init__(self, fp, quiet=True, annotate=True, strict=True):
         self.path = Path(fp)
 
         if not quiet:
             print(f'Loading structure in {self.path.name}')
-        self.structure, self.sequence = read_pdb(self.path, strict=strict)
+        self.structure = read_pdb(self.path, strict=strict)
+        # Reads in ONE sequence; of more chains are present, treat as complex
+        self.sequence = get_sequence(next(self.structure.get_chains()))
         # structure > model > chain > residue > atom
         self.transformed = False
         self.annotation = {}
 
-        # 'ARNDCQEGHILKMFPSTWYV'
-        # SeqUtils.IUPACData.protein_letters_3to1[x]
         if annotate:
             aa = filter_aa(self.structure)
             self.annotate_('position', [i+1 for i in range(len(aa))])
-        # ln = len(list(self.structure.get_residues()))
-        # self.annotate_('position', [i+1 for i in range(ln)])
         return None
 
     def __repr__(self):
