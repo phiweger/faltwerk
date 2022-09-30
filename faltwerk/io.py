@@ -18,6 +18,7 @@ import pandas as pd
 import requests
 import screed
 
+from faltwerk.external import reindex_pdb
 from faltwerk.utils import entropy, mean_pairwise_similarity
 
 
@@ -96,7 +97,7 @@ def read_sequence(fp: Union[str, Path]):
         return l[0].__str__()
 
 
-def read_pdb(fp: Union[str, Path], name: str='x', strict: bool=True) -> Structure:
+def read_pdb(fp: Union[str, Path], name: str='x', strict: bool=True, reindex: bool=False, reindex_start_position: int=1) -> Structure:
     '''
     Return structure AND sequence
 
@@ -125,7 +126,12 @@ def read_pdb(fp: Union[str, Path], name: str='x', strict: bool=True) -> Structur
     # https://biopython.org/wiki/The_Biopython_Structural_Bioinformatics_FAQ
     pdb_parser = PDB.PDBParser(QUIET=True, PERMISSIVE=0)
     structure = pdb_parser.get_structure(name, str(fp))
-    # sequence = read_sequence(fp)
+    
+    if reindex:
+        s = stream(structure).split('\n')
+        x = '\n'.join(reindex_pdb(s, reindex_start_position))
+        pdb_parser = PDB.PDBParser(QUIET=True, PERMISSIVE=0)
+        structure = pdb_parser.get_structure('', StringIO(x))
 
     counts = {
        'models': 0,
@@ -232,6 +238,9 @@ def load_scores(fp):
     return scores
 
 
+def stream(structure):
+    stream = StringIO()
+    return save_pdb(structure, stream).getvalue()
 
 
 

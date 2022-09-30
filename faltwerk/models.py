@@ -15,7 +15,7 @@ warnings.filterwarnings('ignore')
 import numpy as np
 import pandas as pd
 
-from faltwerk.io import read_pdb, save_pdb, load_scores
+from faltwerk.io import read_pdb, save_pdb, load_scores, stream
 from faltwerk.parsers import HMMERStandardOutput
 from faltwerk.utils import (
     align_structures,
@@ -35,26 +35,25 @@ class Complex():
     
     TODO: A Complex object should be made up of two or more Fold objects
     '''
-    def __init__(self, fp, scores=None):
+    def __init__(self, fp, scores=None, reindex: bool=False, reindex_start_position: int=1):
         self.path = Path(fp)
 
         # TODO: This will only read in the first sequence! Thus
         # cx.sequence does not hold all sequences
-        self.structure = read_pdb(self.path, strict=False)
+        self.structure = read_pdb(self.path, strict=False, reindex=reindex, reindex_start_position=reindex_start_position)
         
         self.chains = {}
+        self.annotation = {}
 
         original_ix = []
         for chain in self.structure.get_chains():
             self.chains[chain.id] = chain
             original_ix.extend([i for i in range(len(chain))])
 
-
-        self.annotation = {}
-
         # Positions for the overall complex are sorted by name. So if there
         # are chains (B, C, D) then 0 marks the first position in B.
-        positions, names = [], []
+        absolute_pos, relative_pos, names = [], [], []
+        cnt = 0
         for chain in [v for (k, v) in sorted(self.chains.items())]:
             # print(chain)
             # aa = filter_aa(chain)
@@ -62,14 +61,25 @@ class Complex():
             # TODO: i+1 bc/ 3Dmol.js and PDB count positions from 1?
             # We go with 0-based here bc/ pythonic and intuitive.
             p, q = zip(*[(i, chain.id) for i in range(len(chain))])
-            positions.extend(p)
+            
+            for i in range(len(chain)):
+                absolute_pos.append(cnt)
+                cnt += 1
+
+            relative_pos.extend(p)
             names.extend(q)
 
-        self.len = len(positions)
-
-        assert original_ix == positions, 'Unsorted PDB file'
-        self.annotate_('positions', positions)
+        assert original_ix == relative_pos, 'Unsorted PDB file'
+        self.len = cnt
+        # Provide different indices for chains, which can be useful in plotting
+        self.annotate_('positions', absolute_pos)
+        self.annotate_('chain_positions', relative_pos)
         self.annotate_('chains', names)
+
+        s = sorted(set(self.annotation['chains']))
+        d = {i: j for i, j in zip(s, range(len(s)))}
+        self.annotate_('chains_numbered', [d[k] for k in self.annotation['chains']])
+        self.chains_numbered = d
 
         # In complexes, there is the index position, and the relative one of the
         # chain.
@@ -101,13 +111,18 @@ class Complex():
         return None
 
     def __len__(self):
-        '''Number of amino acids in the sequence'''
-        # return len(list(self.structure.get_residues()))
         return self.len
 
     def to_stream(self):
-        stream = io.StringIO()
-        return save_pdb(self.structure, stream).getvalue()
+        return stream(self.structure)
+
+    def __getitem__(self, ix):
+        '''
+        cx[1]
+        # <Chain id=C>
+        '''
+        k = {v: k for k, v in self.chains_numbered.items()}[ix]
+        return self.chains[k]
 
 
 class Fold():
