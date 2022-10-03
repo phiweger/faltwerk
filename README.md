@@ -10,50 +10,7 @@
 
 The curious thing about proteins is that they come as linear strings of residues, but then fold up into 3D structures, that represent the functionally active form of the molecule (the thing that "does stuff"). Correspondingly, nature most often selects on structure. However, many analyses (positive selection etc.) require the linear sequence. `faltwerk` bridges this gap (see specific use cases below).
 
-PRs and suggestions welcome! The awesome `Anvio` has a [structure module](https://merenlab.org/2018/09/04/getting-started-with-anvio-structure/), should you be dissatisfied with `faltwerk`. 
-
-
-### Install
-
-Quick start using the [colab notebook](https://colab.research.google.com/github/phiweger/faltwerk/blob/master/examples/example_colab.ipynb).
-
-```bash
-# Dependencies
-!pip install faltwerk==0.3
-# Install tools from upstream and downstream tasks
-!pip install -q pdb-tools altair vega_datasets spreg geopandas
-# More dependencies
-!mamba install -q -y -c conda-forge -c bioconda foldseek=3.915ef7d hmmer
-
-# For local execution in a jupyter notebook
-pip install notebook
-jupyter notebook examples/example_local.ipynb
-```
-
-It might be necessary to install a `jupyter` extension to visualize the proteins (you notice if they don't render). Please refer to the `py3Dmol` [install documentation](https://pypi.org/project/py3Dmol/) and [repo](https://github.com/3dmol/3Dmol.js) in this case. A typical setup that renders correctly looks like this (Linux and Mac tested):
-
-```bash
-# ubuntu 20.04. LTS
-# Python 3.10.4
-
-node --version
-# v10.19.0
-
-jupyter --version
-# IPython          : 8.4.0
-# ipykernel        : 6.15.1
-# ipywidgets       : not installed
-# jupyter_client   : 7.3.4
-# jupyter_core     : 4.11.1
-# jupyter_server   : not installed
-# jupyterlab       : not installed
-# nbclient         : 0.6.6
-# nbconvert        : 6.5.3
-# nbformat         : 5.4.0
-# notebook         : 6.4.12
-# qtconsole        : not installed
-# traitlets        : 5.3.0
-```
+PRs and suggestions welcome! The awesome `Anvio` has a [structure module](https://merenlab.org/2018/09/04/getting-started-with-anvio-structure/), should you be dissatisfied with `faltwerk`.
 
 
 ### Usage
@@ -173,3 +130,46 @@ df = pd.DataFrame.from_dict(
 - Do observed mutations cluster in any part of the protein, for example in regions that interface other proteins (protein binding sites) or active sites of the protein?
 - A hotspot/ cluster has been identified; which protein features if any can explain this occurance. For example, is the cluster associated with known protein-binding sites?
 - What's the spatial relationship between mutations deemed pathogenic and the annotated functional domains of a protein?
+
+
+### Install
+
+Quick start using the [colab notebook](https://colab.research.google.com/github/phiweger/faltwerk/blob/master/examples/example_colab.ipynb).
+
+```bash
+# Dependencies
+!pip install faltwerk==0.3
+# Install tools from upstream and downstream tasks
+!pip install -q pdb-tools altair vega_datasets spreg geopandas
+# More dependencies
+!mamba install -q -y -c conda-forge -c bioconda foldseek=3.915ef7d hmmer
+
+# For local execution in a jupyter notebook
+pip install notebook
+jupyter notebook examples/example_local.ipynb
+```
+
+It might be necessary to install a `jupyter` extension to visualize the proteins (you notice if they don't render). Please refer to the `py3Dmol` [install documentation](https://pypi.org/project/py3Dmol/) and [repo](https://github.com/3dmol/3Dmol.js) in this case. A typical setup that renders correctly looks like this (Linux and Mac tested):
+
+```bash
+# ubuntu 20.04. LTS
+# Python 3.10.4
+
+node --version
+# v10.19.0
+
+jupyter --version
+# IPython          : 8.4.0
+# ipykernel        : 6.15.1
+# ipywidgets       : not installed
+# jupyter_client   : 7.3.4
+# jupyter_core     : 4.11.1
+# jupyter_server   : not installed
+# jupyterlab       : not installed
+# nbclient         : 0.6.6
+# nbconvert        : 6.5.3
+# nbformat         : 5.4.0
+# notebook         : 6.4.12
+# qtconsole        : not installed
+# traitlets        : 5.3.0
+```
