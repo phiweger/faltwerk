@@ -272,17 +272,6 @@ def search_domains(fold, hmms, cpus=8):
     return found.dom_hits
 
 
-def filter_aa(structure):
-    residues = []
-    aa = 'ARNDCQEGHILKMFPSTWYV'
-    for res in structure.get_residues():
-        x = res.get_resname()
-        x = x[0] + x[1:].lower()  # ALA > Ala
-        if SeqUtils.IUPACData.protein_letters_3to1[x] in aa:
-            residues.append(res)
-    return residues
-
-
 def flatten(d, parent_key='', sep='_', expected_track_length=None):
     '''
     - https://stackoverflow.com/questions/6027558/flatten-nested-dictionaries-compressing-keys
@@ -323,3 +312,19 @@ def is_tool(name):
 
     from shutil import which
     return which(name) is not None
+
+
+d3to1 = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K', 'ILE': 'I', 'PRO': 'P', 'THR': 'T', 'PHE': 'F', 'ASN': 'N', 'GLY': 'G', 'HIS': 'H', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W', 'ALA': 'A', 'VAL':'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M'}
+def get_sequence(x):
+    return ''.join([d3to1[i.resname] for i in  x.get_residues()])
+
+
+def filter_aa(structure):
+    residues = []
+    aa = 'ARNDCQEGHILKMFPSTWYV'
+    for res in structure.get_residues():
+        x = res.get_resname()
+        x = x[0] + x[1:].lower()  # ALA > Ala
+        if SeqUtils.IUPACData.protein_letters_3to1[x] in aa:
+            residues.append(res)
+    return residues

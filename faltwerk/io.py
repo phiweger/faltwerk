@@ -13,9 +13,12 @@ from Bio import PDB, SeqUtils
 from Bio.PDB import PDBIO, Structure
 from Bio.PDB.PDBParser import PDBParser
 from Bio import SeqIO
+import numpy as np
 import pandas as pd
+import requests
 import screed
 
+from faltwerk.external import reindex_pdb
 from faltwerk.utils import entropy, mean_pairwise_similarity
 
 
@@ -94,7 +97,7 @@ def read_sequence(fp: Union[str, Path]):
         return l[0].__str__()
 
 
-def read_pdb(fp: Union[str, Path], name: str='x', strict: bool=True) -> Structure:
+def read_pdb(fp: Union[str, Path], name: str='x', strict: bool=True, reindex: bool=False, reindex_start_position: int=1) -> Structure:
     '''
     Return structure AND sequence
 
@@ -123,7 +126,12 @@ def read_pdb(fp: Union[str, Path], name: str='x', strict: bool=True) -> Structur
     # https://biopython.org/wiki/The_Biopython_Structural_Bioinformatics_FAQ
     pdb_parser = PDB.PDBParser(QUIET=True, PERMISSIVE=0)
     structure = pdb_parser.get_structure(name, str(fp))
-    sequence = read_sequence(fp)
+    
+    if reindex:
+        s = stream(structure).split('\n')
+        x = '\n'.join(reindex_pdb(s, reindex_start_position))
+        pdb_parser = PDB.PDBParser(QUIET=True, PERMISSIVE=0)
+        structure = pdb_parser.get_structure('', StringIO(x))
 
     counts = {
        'models': 0,
@@ -133,6 +141,7 @@ def read_pdb(fp: Union[str, Path], name: str='x', strict: bool=True) -> Structur
     for model in structure:
         counts['models'] += 1
         for chain in model:
+            # TODO: If multiple, could return all here
             counts['chains'] += 1
 
     if strict:
@@ -143,7 +152,8 @@ def read_pdb(fp: Union[str, Path], name: str='x', strict: bool=True) -> Structur
     except NameError:
         pass
 
-    return structure, sequence
+    # return structure, sequence
+    return structure
 
 
 def load_bfactor_column(fp):
@@ -186,7 +196,6 @@ def parse_hyphy(fp, method='meme', direction='positive', skip=[]):
         assert direction == 'positive', 'The MEME method does not estimate negative selection'
         scores = [i[6] for i in d['MLE']['content']['0']]
         
-
     elif method == 'fubar':
         # posterior probability
         neg, pos = zip(*[i[3:5] for i in d['MLE']['content']['0']])
@@ -205,4 +214,33 @@ def parse_hyphy(fp, method='meme', direction='positive', skip=[]):
         scores = [p for p, sk in zip(scores, skip) if not sk]
 
     return scores
+
+
+def get_alphafold2_model_from_ena(ID=None, fp=None):
+    # eg AF-Q09428-F1
+    url = f'https://alphafold.ebi.ac.uk/files/{ID}-model_v3.pdb'
+    r = requests.get(url)
+    assert r.status_code == 200, 'Download failed'
+    pdb = r.text
+    if not fp:
+        fp = f'{ID}.pdb'
+    with open(fp, 'w+') as out:
+        out.write(pdb)
+    return None
+
+
+def load_scores(fp):
+    '''
+    Expects pLDDT scores as output by ColabFold.
+    '''
+    with open(fp, 'r') as file:
+        scores = json.load(file)
+    return scores
+
+
+def stream(structure):
+    stream = StringIO()
+    return save_pdb(structure, stream).getvalue()
+
+
 

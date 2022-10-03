@@ -123,7 +123,8 @@ class Layout():
     https://stackoverflow.com/questions/41817578/basic-method-chaining
     '''
     def __init__(self, fold=None, panel_size=(400, 300), grid=(1, 1), linked=True, src='https://3dmol.org/build/3Dmol.js'):
-        self.fold = fold
+        
+        self.fold = fold  # can be a Complex object
         
         # Create panel map, which tracks which vis is applied in which panel of the layout
         rows = [i for i in range(grid[0])]
@@ -201,6 +202,7 @@ class Layout():
         
         if n_colors > 1:
             cmap = map_colors(anno, palette, color_map_limits, offset=1)
+            # print(cmap)
             # Maps positions to colors
             # ... 668: '#ff2211', 669: '#ff1f10', 670: '#ff1f10' ...
         
@@ -273,13 +275,14 @@ class Layout():
         # pdb.set_trace()
         return self
     
-    def geom_sphere(self, selection=None, key='position', color='black', radius=2, panel=(0, 0)):
+    def geom_sphere(self, selection=None, key='position', color='black', opacity=1, radius=2, panel=(0, 0)):
         
         if not selection:
             selection = self.select()
     
         properties = {
-            'radius': radius
+            'radius': radius,
+            'opacity': opacity,
         }
     
         style = {'sphere': {'color': color, **properties}}

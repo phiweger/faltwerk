@@ -1,23 +1,31 @@
+from collections import defaultdict
 # import shutil
 import subprocess
 import tempfile
 try:
-    from typing import Union
+    from typing import Union, List
 except ImportError:
-    from typing_extensions import Union
+    from typing_extensions import Union, List
 
+from Bio.PDB.Chain import Chain
 from Bio.PDB.Residue import Residue
 from Bio.PDB.Atom import Atom
 from libpysal.weights import DistanceBand
 import numpy as np
 import screed
 
+from faltwerk.models import Fold
 
-def get_alpha_carbon_atoms(fold, only_coords=False):
+
+def get_alpha_carbon_atoms(x: Union[Atom, Residue], only_coords=False):
     '''
     alpha carbon: https://foldit.fandom.com/wiki/Alpha_carbon
     '''
-    for res in fold.structure.get_residues():
+    if type(x) == Fold:
+        residues = x.structure.get_residues()
+    else:
+        residues = x.get_residues()
+    for res in residues:
         l = []
         for i in res.get_atoms():
             # There is only one alpha carbon per amino acid.
@@ -109,6 +117,14 @@ def get_foldseek_vae_states(fold):
        return next(file).sequence
 
 
+def get_foldseek_vae_states_from_path(fp):
+    '''
+    Turn the model's states and aa sequence into tokens
+    '''
+    model = Fold(fp)
+    return get_foldseek_vae_states(model)
+
+
 def distance_to_closest_active_site(fold, binding_frequencies, threshold=0.5):
     '''
     Usage:
@@ -134,35 +150,70 @@ def distance_to_closest_active_site(fold, binding_frequencies, threshold=0.5):
     return l
 
 
-def get_complex_interface(cx, angstrom=10):
+def get_complex_interface(chains: List, angstrom=10, map_to_chains=False):
     '''
     from foldspace.models import Complex
     from foldspace.geometry import get_complex_interface
 
     cx = Complex('/path/to/model.pdb')
     interface = get_complex_interface(cx, 10)
+
+    map_to_chains .. remember which interface atom belongs to which chain(s)
     '''
     coords = []
     labels = []
-    for chain in cx.chains:
+    ix_residues = []
+    pairwise = []
+
+    for chain in chains:
         # TODO: Add a more general iterator, for both complexes and single folds
         for atom in chain.get_atoms():
             if atom.get_id() == 'CA':
                 coords.append(get_coordinate(atom))
                 labels.append(chain.id)
+                # For each chain, residue numbering starts at 1
+                ix_residues.append(atom.parent.id[1])
                 
     lu = {i: j for i, j in enumerate(labels)}
-    dist = DistanceBand(coords, 10, p=2, binary=True)
-    assert len(dist.neighbors.keys()) == len(cx)
+    # lu .. lookup: {712: 'C', 713: 'C', 714: ...
+    lu_res = {i: j for i, j in enumerate(zip(labels, ix_residues))}  
+    # {0: ('B', 1), 1: ('B', 2), 2: ...
+
+    dist = DistanceBand(coords, angstrom, p=2, binary=True)
+    # {0: [1, 2], 1: [0, 2, 3, 4], 2: ...
+    # assert len(dist.neighbors.keys()) == len(cx)
     
     interface = set()
     for k, v in dist.neighbors.items():
         origin = lu[k]
         for i in v:
-            if lu[i] != origin and origin == 'B':
+            if lu[i] != origin:
                 interface.add(k)
+                pairwise.append([lu_res[k], lu_res[i]])
     
-    return interface
+    #import pdb
+    #pdb.set_trace()
+
+    if map_to_chains:
+        return [(k, lu_res[k]) for k in interface], pairwise
+    else:
+        return interface
+
+
+def get_interface(A: Chain, B: Chain, angstrom=10):
+    '''
+    Get all residue positions that are likely binding partners btw/ 2 chains.
+
+    Example:
+
+    get_interface(cx.chains['B'], cx.chains['D'])
+    '''
+    d = defaultdict(set)
+    _, pairwise = get_complex_interface(
+        [A, B], map_to_chains=True, angstrom=angstrom)
+    for (k1, v1), (k2, v2) in pairwise:
+        d[k1].add(v1)
+    return dict(d)  # return dict not defaultdict to avoid unexpect behav
 
 
 def distance_to_positions(model, positions):

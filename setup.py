@@ -35,6 +35,7 @@ setup(
         'pytest==7.1.2',
         'libpysal==4.6.2',
         'esda==2.4.3',
+        'multiprocess==0.70.13'
     ],
 
     # https://click.palletsprojects.com/en/7.x/setuptools/#testing-the-script
