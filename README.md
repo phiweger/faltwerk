@@ -134,6 +134,12 @@ df = pd.DataFrame.from_dict(
 
 ### Install
 
+If you want to programmatically search for hotspots, the easiest way to get started is to use the image we provide through docker:
+
+```bash
+docker pull nanozoo/faltwerk:3.8--08dc798
+```
+
 Quick start using the [colab notebook](https://colab.research.google.com/github/phiweger/faltwerk/blob/master/examples/example_colab.ipynb).
 
 ```bash

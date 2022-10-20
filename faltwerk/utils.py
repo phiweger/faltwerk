@@ -177,7 +177,10 @@ def align_structures(query: Structure, target: Structure, mode=0, minscore=0.5):
     assert log.returncode == 0, log.stderr
 
     with open(f'{p}/aln_tmscore.tsv', 'r') as file:
-        qry, rest = next(file).strip().split('\t')
+        try:
+            qry, rest = next(file).strip().split('\t')
+        except StopIteration:
+            raise ValueError(f'No alignment found at minimum Tm score {minscore}')
         ref, score, *rest = rest.split(' ')
         rest = [float(i) for i in rest]
         translation = rest[:3]
