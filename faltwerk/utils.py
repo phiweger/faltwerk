@@ -10,7 +10,6 @@ except ImportError:
 import tempfile
 
 from Bio import SeqUtils
-from Bio.PDB import PDBIO
 from Bio.PDB.Structure import Structure
 import numpy as np
 

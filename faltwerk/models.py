@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 import pkg_resources
 import re
+import subprocess
+import tempfile
 try:
     from typing import Union
 except ImportError:
@@ -41,7 +43,7 @@ class Complex():
         # TODO: This will only read in the first sequence! Thus
         # cx.sequence does not hold all sequences
         self.structure = read_pdb(self.path, strict=False, reindex=reindex, reindex_start_position=reindex_start_position)
-        
+        # "The Structure Object" -- https://biopython.org/wiki/The_Biopython_Structural_Bioinformatics_FAQ
         self.chains = {}
         self.annotation = {}
 
@@ -49,6 +51,8 @@ class Complex():
         for chain in self.structure.get_chains():
             self.chains[chain.id] = chain
             original_ix.extend([i for i in range(len(chain))])
+
+        self.sequences = {i: get_sequence(ch) for i, ch in self.chains.items()}
 
         # Positions for the overall complex are sorted by name. So if there
         # are chains (B, C, D) then 0 marks the first position in B.
@@ -123,6 +127,12 @@ class Complex():
         '''
         k = {v: k for k, v in self.chains_numbered.items()}[ix]
         return self.chains[k]
+    
+    def delete_chains(self, chains):
+        return delete_chains(self, chains)
+    
+    def __sub__(self, chains):
+        return delete_chains(self, chains)
 
 
 class Fold():
@@ -486,7 +496,26 @@ with open('zinc.csv', 'w+') as out:
 
 '''
 
+def delete_chains(model, chains):
+    '''
+    # http://www.bonvinlab.org/pdb-tools/
+    python pdb_delchain.py -A,B 1CTF.pdb
+    '''    
+    with tempfile.TemporaryDirectory() as p:
+    # p = tmp.name
 
+        fp = f'{p}/fold.pdb'
+        save_pdb(model.structure, fp)
+
+        steps = [
+            f'pdb_delchain -{",".join(chains)} {fp} > {p}/deleted.pdb',
+        ]
+        command = '; '.join(steps)
+        log = subprocess.run(command, capture_output=True, shell=True)
+        assert log.returncode == 0, log.stderr
+        
+        new_model = Complex(f'{p}/deleted.pdb', reindex=True)
+        return new_model
 
 
 
