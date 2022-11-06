@@ -131,8 +131,14 @@ class Complex():
     def delete_chains(self, chains):
         return delete_chains(self, chains)
     
+    def keep_chains(self, chains):
+        return delete_chains(self, chains, invert=True)
+    
     def __sub__(self, chains):
         return delete_chains(self, chains)
+    
+    def __mul__(self, chains):
+        return delete_chains(self, chains, invert=True)
 
 
 class Fold():
@@ -496,16 +502,21 @@ with open('zinc.csv', 'w+') as out:
 
 '''
 
-def delete_chains(model, chains):
+def delete_chains(model, chains, invert=False):
     '''
     # http://www.bonvinlab.org/pdb-tools/
     python pdb_delchain.py -A,B 1CTF.pdb
+
+    When invert, instead of deleting the chains, keep them and remove all others.
     '''    
     with tempfile.TemporaryDirectory() as p:
     # p = tmp.name
 
         fp = f'{p}/fold.pdb'
         save_pdb(model.structure, fp)
+
+        if invert:
+            chains = [i for i in model.chains.keys() if i not in chains]
 
         steps = [
             f'pdb_delchain -{",".join(chains)} {fp} > {p}/deleted.pdb',
