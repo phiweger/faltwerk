@@ -13,13 +13,11 @@ from Bio import PDB, SeqUtils
 from Bio.PDB import PDBIO, Structure
 from Bio.PDB.PDBParser import PDBParser
 from Bio import SeqIO
-import numpy as np
-import pandas as pd
 import requests
 import screed
 
 from faltwerk.external import reindex_pdb
-from faltwerk.utils import entropy, mean_pairwise_similarity
+from faltwerk.utils import mean_pairwise_similarity
 
 
 def save_pdb(structure: Structure, out: Union[str, Path, StringIO]) -> None:

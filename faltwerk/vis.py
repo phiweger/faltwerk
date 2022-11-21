@@ -159,8 +159,9 @@ class Layout():
             selection.update({'atom': elements})
         
         if chain:
-            assert chain in [i.id for i in self.fold.structure.get_chains()]
+            # 'B' and ['B', 'C'] will both work.
             selection.update({'chain': chain})
+            # assert chain in [i.id for i in self.fold.structure.get_chains()]
         
         return selection
         
