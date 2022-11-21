@@ -35,7 +35,14 @@ setup(
         'pytest==7.1.2',
         'libpysal==4.6.2',
         'esda==2.4.3',
-        'multiprocess==0.70.13'
+        'multiprocess==0.70.13',
+        # 4 docs
+        'nbsphinx',
+        'myst-parser==0.18.1',
+        'Jinja2==3.1.2',
+        'alabaster',
+        'sphinxcontrib-napoleon',
+        'docutils>=0.17.1,<0.20',
     ],
 
     # https://click.palletsprojects.com/en/7.x/setuptools/#testing-the-script

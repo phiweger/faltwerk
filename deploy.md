@@ -1,5 +1,9 @@
 ## Deploy
 
+- https://docs.python-guide.org/writing/documentation/
+- https://docs.readthedocs.io/en/stable/tutorial/
+
+
 ```bash
 # Documentation
 # pip install sphinx nbsphinx myst_parser
