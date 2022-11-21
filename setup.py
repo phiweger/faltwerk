@@ -37,10 +37,12 @@ setup(
         'esda==2.4.3',
         'multiprocess==0.70.13',
         # 4 docs
+        # https://github.com/sourmash-bio/sourmash/blob/latest/pyproject.toml#L115
         'nbsphinx',
         'myst-parser==0.18.1',
         'Jinja2==3.1.2',
         'alabaster',
+        'ipython',
         'sphinxcontrib-napoleon',
         'docutils>=0.17.1,<0.20',
     ],
