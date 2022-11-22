@@ -2,6 +2,8 @@
 
 - https://docs.python-guide.org/writing/documentation/
 - https://docs.readthedocs.io/en/stable/tutorial/
+- https://samnicholls.net/2016/06/15/how-to-sphinx-readthedocs/
+- https://stackoverflow.com/questions/23211695/modifying-content-width-of-the-sphinx-theme-read-the-docs
 
 
 ```bash

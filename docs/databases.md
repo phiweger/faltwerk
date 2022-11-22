@@ -1,4 +1,0 @@
-# Databases
-
-```{contents}
-```

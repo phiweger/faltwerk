@@ -38,6 +38,23 @@ def find_hotspots(model, features, method: Literal['getis_ord', 'moran'] = 'geti
     "p_z_sim" in:
 
     - https://squidpy.readthedocs.io/en/latest/_modules/squidpy/gr/_ppatterns.html
+
+    Usage:
+
+    >>> from faltwerk.stats import find_hotspots
+    >>> # Assuming the following residues have been found by some analysis, eg
+    >>> # positive selection:
+    >>> m = Fold('some.pdb')
+    >>> res = [45, 47, 112, 123, 124]
+    >>> selection = [1 if i in res else 0 for i in range(len(m))]
+    >>> hotspots = find_hotspots(m, selection)
+
+    Optional arguments:
+
+    - method to test for local association -- "getis_ord" (default) or "moran"
+    - angstrom -- maximum distance of what constitutes a residue's neighbor (default 8)
+    - false_discovery_rate -- max. FDR to adjust for (default 0.05)
+    - test_two_sided -- Test two-sided? (default False, ie one-sided)
     '''
     ca = list(get_alpha_carbon_atoms(model, only_coords=True))
     dist = DistanceBand(ca, angstrom, p=2, binary=True)
@@ -73,15 +90,22 @@ def find_hotspots(model, features, method: Literal['getis_ord', 'moran'] = 'geti
 # Point pattern analysis
 # https://geographicdata.science/book/notebooks/08_point_pattern_analysis.html#ripley-s-alphabet-of-functions
 
-def cluster(fold, mask, method='HDBSCAN', **kwargs):
+def cluster(fold, mask, method='HDBSCAN', angstrom=8, **kwargs):
     '''
-    from faltwerk.stats import cluster
-    from faltwerk.geometry import get_alpha_carbon_atoms
+    Instead of testing for local association, group residues based on density.
 
     Usage:
 
-    cluster(model, mask, min_cluster_size=2)
-    cluster(model, hotspots, method='MCL', angstrom=8)
+    >>> from faltwerk.stats import cluster
+    >>> from faltwerk.geometry import get_alpha_carbon_atoms
+    >>> cluster(model, mask, min_cluster_size=2)
+    >>> cluster(model, hotspots)
+
+    Optional arguments:
+
+    - method -- "HDBSCAN" (default) or "MCL"
+    - angstrom -- only for MCL clustering, what constitutes a neighbor (default 8)
+    - kwargs -- only for HDBSCAN, passed to the clustering fn
     '''
     assert all([i in set([0, 1, False, True]) for i in set(mask)]), \
     'Ambiguous mask, only (0, 1) or boolean allowed'
@@ -91,7 +115,6 @@ def cluster(fold, mask, method='HDBSCAN', **kwargs):
     points = list(get_alpha_carbon_atoms(fold, only_coords=True))
     X = [i for i, j in zip(points, mask) if j]
     
-
     if method == 'HDBSCAN':
         clusterer = HDBSCAN(**kwargs)
 
@@ -102,7 +125,7 @@ def cluster(fold, mask, method='HDBSCAN', **kwargs):
         yrev = list(yhat.copy()[::-1])
 
     elif method == 'MCL':
-        yhat =  mcl(fold, mask, **kwargs)
+        yhat =  mcl(fold, mask, angstrom, **kwargs)
         yrev = yhat.copy()
         yrev.reverse()  # inplace operation
 
@@ -117,7 +140,7 @@ def cluster(fold, mask, method='HDBSCAN', **kwargs):
 
 def mcl(fold, mask, angstrom=8, inflation=1.4, **kwargs):
     '''
-    Markov chain clustering
+    Helper fn for Markov chain clustering
     '''
     coords = list(enumerate(get_alpha_carbon_atoms(fold, only_coords=True)))
     candidates = {k: v for (k, v), m in zip(coords, mask) if m}
@@ -152,38 +175,4 @@ def mcl(fold, mask, angstrom=8, inflation=1.4, **kwargs):
         cnt += 1
 
     return yhat
-
-
-'''
-TODO:
-
-random forest, predict whether a residue is part of a "positive selection" hot spot from its features, then rank variable importance to see which features 
-matter most. This assumes that a single objective acted on the protein, which
-is unlikely but let's try this anyway.
-
-==?
-
-enrichment: given spatial clusters, are they enriched in any feature?
-
-- distance to ligand
-- solvent accessibility
-- interface
-
-
-find spatial clusters > segment with HDBSCAN > for each cluster, predict whether a residue is in or out, the rank features by importance to find most
-likely explanatory factor for this cluster. Stop at any step (clusters too small, ...) -- or logistic regression (Bayes); something simple -- https://stats.stackexchange.com/questions/192310/is-random-forest-suitable-for-very-small-data-sets
-'''
-
-
-'''
-TODO: We could feed the clusters to the Getis-Ord statistic or calculate eg
-the (adjusted) Rand score.
-
-Or feed the significant areas to itself now using other features (interface,
-...)
-'''
-
-
-
-
 

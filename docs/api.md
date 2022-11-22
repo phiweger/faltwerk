@@ -1,9 +1,9 @@
-# `faltwerk` Python API
+# `faltwerk` Python API basics
 
 The primary programmatic way of interacting with `sourmash` is via
 its Python API.
 
-**Please also see [examples of using the API](api-example.md).**
+For more specialized operations, please also see eg functions related to [geometry](geometry.md) and [stats](stats.md).
 
 ```{contents}
    :depth: 2

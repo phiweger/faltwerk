@@ -21,6 +21,9 @@ from faltwerk.utils import mean_pairwise_similarity
 
 
 def save_pdb(structure: Structure, out: Union[str, Path, StringIO]) -> None:
+    '''
+    Save structure as pdb file.
+    '''
     file = PDBIO()
     file.set_structure(structure)
     
@@ -99,15 +102,17 @@ def read_pdb(fp: Union[str, Path], name: str='x', strict: bool=True, reindex: bo
     '''
     Return structure AND sequence
 
-    # https://biopython.org/wiki/The_Biopython_Structural_Bioinformatics_FAQ
+    https://biopython.org/wiki/The_Biopython_Structural_Bioinformatics_FAQ
 
-    p = PDBParser()
-    structure = p.get_structure("X", "pdb1fat.ent")
-    for model in structure:
-        for chain in model:
-            for residue in chain:
-                for atom in residue:
-                    print(atom)
+    The hierarchy of the PDB parser is this:
+
+    >>> p = PDBParser()
+    >>> structure = p.get_structure("X", "pdb1fat.ent")
+    >>> for model in structure:
+    >>>     for chain in model:
+    >>>         for residue in chain:
+    >>>             for atom in residue:
+    >>>                 print(atom)
     '''
     fp = Path(fp)
     assert fp.exists()
@@ -180,11 +185,13 @@ def load_bfactor_column(fp):
 
 def parse_hyphy(fp, method='meme', direction='positive', skip=[]):
     '''
-    TODO: Just count the number of "MEME" or "FUBAR" in the results file to
-    infer the program that was used.
+    ``hyphy`` returns endless files with lots and lots of values (granted, it
+    makes the calculations very transparent). Parse them into a human-
+    friendly format.
 
-    skip .. use e.g. to mask gaps in an alignment, needs to be some form of
-    binary iterator (eg [0, 0, 0, 1, 0, 0, 0, ...])
+    Optional arguments:
+
+    - skip -- use e.g. to mask gaps in an alignment, needs to be some form of binary iterator (eg [0, 0, 0, 1, 0, 0, 0, ...])
     '''
     with open(fp, 'r') as file:
         d = json.load(file)
@@ -229,7 +236,7 @@ def get_alphafold2_model_from_ena(ID=None, fp=None):
 
 def load_scores(fp):
     '''
-    Expects pLDDT scores as output by ColabFold.
+    Expects pLDDT scores as output by ColabFold
     '''
     with open(fp, 'r') as file:
         scores = json.load(file)

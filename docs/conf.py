@@ -19,6 +19,12 @@ import os
 import faltwerk
 print('faltwerk at:', faltwerk)
 
+
+# def setup(app):
+#     # https://stackoverflow.com/questions/23211695/modifying-content-width-of-the-sphinx-theme-read-the-docs
+#     app.add_css_file('my_theme.css')
+
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -129,6 +135,8 @@ html_theme_options = {
     'logo_name': True,
     'description': 'Explore proteins without the pain',
     'page_width': 'auto',
+    'sidebar_width': '400px',
+    # 'fixed_sidebar': True,
 }
 
 # Add any paths that contain custom themes here, relative to this directory.
@@ -153,7 +161,11 @@ html_theme_options = {
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
+
 html_static_path = ['_static']
+# html_css_files = ['_static/my_theme.css']
+# https://stackoverflow.com/questions/23211695/modifying-content-width-of-the-sphinx-theme-read-the-docs
+# https://alabaster.readthedocs.io/en/latest/customization.html
 
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
