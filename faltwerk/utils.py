@@ -50,7 +50,7 @@ def rmdir(directory):
             item.unlink()
     directory.rmdir()
 
-
+ 
 '''
 OMG getting this right took me forever, so some more comments on how to align
 two protein structures.
