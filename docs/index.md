@@ -14,3 +14,5 @@ io
 geometry
 stats
 ```
+
+We also provide several (executable) [`jupyter notebook`s](https://github.com/phiweger/faltwerk/examples) that illustrate a range of use cases. 
