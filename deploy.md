@@ -21,3 +21,6 @@ Uploading distributions to https://upload.pypi.org/legacy/
 # Enter your username: ...
 # Enter your password: ...
 ```
+
+Once the project is registered with readthedocs.org the documentation rebuilds each time there is a push to the Github repo (login to readthedocs to see the build progress/ any errors).
+
